@@ -74,7 +74,7 @@ A comprehensive FAQ and Product Questions management system for Magento 2 that t
 - Full-text search across questions and answers
 - Search term analytics dashboard — identify what customers can't find
 - Configurable results ranking and pagination
-- "Related Questions" suggestions
+- Search results with pagination and sorting
 
 #### ⭐ **Customer Engagement & Social Proof**
 - **Three Rating Modes:**
@@ -646,7 +646,7 @@ Create custom plugins in `app/code/Vendor/Module/etc/di.xml`:
 
 This module is licensed under the **Open Software License v. 3.0 (OSL-3.0)**.
 
-See [LICENSE](LICENSE.txt) or https://opensource.org/licenses/OSL-3.0 for the full license text.
+See https://opensource.org/licenses/OSL-3.0 for the full license text.
 
 ## Contributing
 
