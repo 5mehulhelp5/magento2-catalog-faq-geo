@@ -513,10 +513,6 @@ No hard limit. Performance depends on your server resources and database optimiz
 
 ## Support & Extension
 
-**Module Homepage:** https://magendoo.com  
-
-**License:** OSL-3.0 (Open Software License v. 3.0)
-
 ### Extension Points
 
 Create custom plugins in `app/code/Vendor/Module/etc/di.xml`:
