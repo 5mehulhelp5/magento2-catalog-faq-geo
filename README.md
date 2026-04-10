@@ -622,7 +622,7 @@ Create custom plugins in `app/code/Vendor/Module/etc/di.xml`:
    ```bash
    bin/magento deploy:mode:set developer
    ```
-3. **Contact Support:** For additional assistance, visit https://magendoo.com/support
+3. **Contact Support:** Create an issue on GitHub for assistance
 
 ## Changelog
 
@@ -666,10 +666,7 @@ Please ensure your code:
 
 ## Support & Resources
 
-- **Documentation:** https://docs.magendoo.com/faq-module
-- **Support:** https://magendoo.com/support
-- **Issue Tracker:** https://github.com/magendoo/magento2-faq/issues
-- **Website:** https://magendoo.com
+- **Issue Tracker:** https://github.com/magendooro/magento2-catalog-faq-geo/issues
 
 ---
 
