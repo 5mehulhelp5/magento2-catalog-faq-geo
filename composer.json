@@ -1,0 +1,48 @@
+{
+    "name": "magendoo/module-faq",
+    "description": "Magento 2 FAQ and Product Questions module — SEO-optimized FAQ pages, product Q&A tabs, ask-a-question forms, ratings, and admin knowledge base management.",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Magendoo",
+            "homepage": "https://magendoo.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "magento/framework": ">=103.0.0",
+        "magento/module-catalog": ">=104.0.0",
+        "magento/module-cms": ">=104.0.0",
+        "magento/module-store": ">=101.0.0",
+        "magento/module-customer": ">=103.0.0",
+        "magento/module-backend": ">=102.0.0",
+        "magento/module-ui": ">=101.2.0",
+        "magento/module-url-rewrite": ">=102.0.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan": "^1.10 || ^2.0"
+    },
+    "autoload": {
+        "files": ["registration.php"],
+        "psr-4": {
+            "Magendoo\\Faq\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Magendoo\\Faq\\Test\\": "Test/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testdox",
+        "analyse": "phpstan analyse --no-progress"
+    },
+    "config": {
+        "allow-plugins": {
+            "magento/magento-composer-installer": true
+        }
+    }
+}

@@ -1,0 +1,13 @@
+LESSONS_LEARNED.md
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+composer.lock
+.phpstan/
+.php-cs-fixer.cache
+test-results/
+playwright-report/
+/coverage/
+*.local
