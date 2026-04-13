@@ -6,6 +6,20 @@
 
 A comprehensive FAQ and Product Questions management system for Magento 2 that transforms customer support into a conversion driver through SEO-optimized knowledge bases, product-specific Q&A, and customer engagement tools.
 
+## Screenshots
+
+### Product Page — FAQ tab with questions and "Ask a Question" form
+
+![Product Page FAQ Tab](docs/magento2-catalog-faq-geo.png)
+
+### Admin — Question editor with WYSIWYG answer, status workflow, and SEO fields
+
+![Admin Question Editor](docs/magento2-catalog-faq-geo-edit.png)
+
+### Admin — FAQ Questions grid with filtering, mass actions, and status management
+
+![Admin Questions Grid](docs/magento2-catalog-faq-geo-list.png)
+
 ## Features
 
 - 📚 **Hierarchical FAQ Organization** — Categories, tags, and product associations
