@@ -758,6 +758,7 @@ Please ensure your code:
 ## Support & Resources
 
 - **Issue Tracker:** https://github.com/magendooro/magento2-catalog-faq-geo/issues
+- **Implementation & Customization Services:** [info@magendoo.ro](mailto:info@magendoo.ro)
 
 ---
 
