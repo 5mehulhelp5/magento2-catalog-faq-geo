@@ -92,4 +92,21 @@ class Collection extends AbstractCollection
 
         return $this;
     }
+
+    /**
+     * Lenient visibility filter: show categories with NO group restriction
+     * OR categories matching the given group ID.
+     *
+     * @param int $groupId
+     * @return $this
+     */
+    public function addCustomerGroupVisibilityFilter(int $groupId): static
+    {
+        $junction = $this->getTable('magendoo_faq_category_customer_group');
+        $noRestriction = "NOT EXISTS (SELECT 1 FROM {$junction} ccg WHERE ccg.category_id = main_table.category_id)";
+        $matchesGroup = "EXISTS (SELECT 1 FROM {$junction} ccg WHERE ccg.category_id = main_table.category_id AND ccg.customer_group_id = " . (int) $groupId . ')';
+        $this->getSelect()->where("({$noRestriction}) OR ({$matchesGroup})");
+
+        return $this;
+    }
 }

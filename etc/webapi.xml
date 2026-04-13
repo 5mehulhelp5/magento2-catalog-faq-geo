@@ -120,11 +120,71 @@
         </resources>
     </route>
 
-    <!-- Tags -->
+    <!-- Category URL-key lookup (headless/PWA) -->
+    <route url="/V1/faq/categories/url-key/:urlKey/store/:storeId" method="GET">
+        <service class="Magendoo\Faq\Api\CategoryRepositoryInterface" method="getByUrlKey"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Question URL-key lookup (headless/PWA) -->
+    <route url="/V1/faq/questions/url-key/:urlKey/store/:storeId" method="GET">
+        <service class="Magendoo\Faq\Api\QuestionRepositoryInterface" method="getByUrlKey"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Send answer notification email (admin automation) -->
+    <route url="/V1/faq/questions/:questionId/notify" method="POST">
+        <service class="Magendoo\Faq\Api\QuestionManagementInterface" method="sendAnswerNotification"/>
+        <resources>
+            <resource ref="Magendoo_Faq::question_edit"/>
+        </resources>
+    </route>
+
+    <!-- Increment view count (analytics / headless) -->
+    <route url="/V1/faq/questions/:questionId/view" method="POST">
+        <service class="Magendoo\Faq\Api\QuestionManagementInterface" method="incrementViewCount"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!-- Tags — full CRUD -->
     <route url="/V1/faq/tags" method="GET">
         <service class="Magendoo\Faq\Api\TagRepositoryInterface" method="getList"/>
         <resources>
             <resource ref="Magendoo_Faq::question"/>
+        </resources>
+    </route>
+
+    <route url="/V1/faq/tags/:tagId" method="GET">
+        <service class="Magendoo\Faq\Api\TagRepositoryInterface" method="getById"/>
+        <resources>
+            <resource ref="Magendoo_Faq::question"/>
+        </resources>
+    </route>
+
+    <route url="/V1/faq/tags" method="POST">
+        <service class="Magendoo\Faq\Api\TagRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magendoo_Faq::question_edit"/>
+        </resources>
+    </route>
+
+    <route url="/V1/faq/tags/:tagId" method="PUT">
+        <service class="Magendoo\Faq\Api\TagRepositoryInterface" method="save"/>
+        <resources>
+            <resource ref="Magendoo_Faq::question_edit"/>
+        </resources>
+    </route>
+
+    <route url="/V1/faq/tags/:tagId" method="DELETE">
+        <service class="Magendoo\Faq\Api\TagRepositoryInterface" method="deleteById"/>
+        <resources>
+            <resource ref="Magendoo_Faq::question_delete"/>
         </resources>
     </route>
 </routes>

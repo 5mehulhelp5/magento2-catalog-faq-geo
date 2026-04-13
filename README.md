@@ -136,28 +136,38 @@ All repositories support:
 
 Complete REST coverage for headless implementations:
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/V1/faq/categories` | GET/POST | List or create categories |
-| `/V1/faq/categories/:id` | GET/PUT/DELETE | Category operations |
-| `/V1/faq/questions` | GET/POST | List or create questions |
-| `/V1/faq/questions/:id` | GET/PUT/DELETE | Question operations |
-| `/V1/faq/questions/submit` | POST | Public question submission (guests allowed) |
-| `/V1/faq/questions/:id/rate` | POST | Submit rating/vote (guests allowed) |
-| `/V1/faq/products/:id/questions` | GET | Get product-specific Q&A |
-| `/V1/faq/categories/:id/questions` | GET | Get category questions |
-| `/V1/faq/questions/search` | GET | Full-text search |
-| `/V1/faq/tags` | GET | List tags |
+| Endpoint | Method | Access | Description |
+|----------|--------|--------|-------------|
+| `/V1/faq/categories` | GET/POST | admin | List or create categories |
+| `/V1/faq/categories/:id` | GET/PUT/DELETE | admin | Category CRUD |
+| `/V1/faq/categories/url-key/:key/store/:id` | GET | public | Lookup by URL key |
+| `/V1/faq/questions` | GET/POST | admin | List or create questions |
+| `/V1/faq/questions/:id` | GET/PUT/DELETE | admin | Question CRUD |
+| `/V1/faq/questions/url-key/:key/store/:id` | GET | public | Lookup by URL key |
+| `/V1/faq/questions/submit` | POST | public | Anonymous question submission |
+| `/V1/faq/questions/:id/rate` | POST | public | Submit rating/vote |
+| `/V1/faq/questions/:id/view` | POST | public | Increment view count |
+| `/V1/faq/questions/:id/notify` | POST | admin | Send answer notification email |
+| `/V1/faq/products/:id/questions` | GET | public | Product-specific Q&A |
+| `/V1/faq/categories/:id/questions` | GET | public | Category questions |
+| `/V1/faq/questions/search` | GET | public | Full-text search |
+| `/V1/faq/tags` | GET/POST | admin | List or create tags |
+| `/V1/faq/tags/:id` | GET/PUT/DELETE | admin | Tag CRUD |
+
+**24 endpoints total — 100% test coverage via Playwright.**
 
 ### Custom URL Router
 
 Implements `Magento\Framework\App\RouterInterface` for clean SEO URLs:
 
 ```
-/faq/                                    → Home page (category listing)
+/faq/                                    → Home page (category listing + search)
 /faq/{category-url-key}                  → Category page
-/faq/{category-url-key}/{question-key}   → Question detail
+/faq/{category-url-key}/{question-key}   → Question detail (within category)
+/faq/{question-url-key}                  → Question detail (URL rewrite)
+/faq/tag/{tag-url-key}                   → Tag page (questions with this tag)
 /faq/search?q=keyword                    → Search results
+/faq/question/suggest?q=keyword          → AJAX autocomplete (JSON)
 ```
 
 **Features:**
@@ -167,7 +177,32 @@ Implements `Magento\Framework\App\RouterInterface` for clean SEO URLs:
 - Automatic URL rewrite generation on entity save
 - CLI command for bulk regeneration: `bin/magento magendoo:faq:reindex`
 
-### Database Schema (11 Tables)
+### CLI Commands
+
+```bash
+# Regenerate FAQ URL rewrites for all categories and questions
+bin/magento magendoo:faq:reindex
+
+# Export questions or categories to CSV
+bin/magento magendoo:faq:export -e questions -f var/export/faq-questions.csv
+bin/magento magendoo:faq:export -e categories -f var/export/faq-categories.csv
+
+# Import questions or categories from CSV (upsert — creates new, updates existing)
+bin/magento magendoo:faq:import -e questions -f var/export/faq-questions.csv
+bin/magento magendoo:faq:import -e categories -f var/export/faq-categories.csv
+```
+
+### CMS Widgets
+
+Three widgets for embedding FAQ content on any CMS page via the admin widget inserter:
+
+| Widget | Description |
+|--------|-------------|
+| **FAQ Questions List** | Displays questions, optionally filtered by category. List or accordion template. |
+| **FAQ Categories List** | Renders category links with optional question counts. |
+| **FAQ Search Box** | Embeds a search form with configurable placeholder text. |
+
+### Database Schema (12 Tables)
 
 **Core Entities:**
 - `magendoo_faq_category` — Category data with SEO fields
@@ -273,10 +308,10 @@ Magendoo_Faq::faq                    # Root permission
 
 **RequireJS Components:**
 ```javascript
-// FAQ-specific JavaScript
-faq-rating      // AJAX voting handler
-faq-search      // Search form validation
-faq-submit      // Question submission with validation
+faqRating        // AJAX voting handler with duplicate-vote prevention
+faqSearch        // Search form validation
+faqAutocomplete  // Debounced AJAX autocomplete dropdown
+faqTabDeeplink   // Deep-link fix for product page FAQ tab (#product_faq)
 ```
 
 **Layout Handles:**
@@ -291,17 +326,26 @@ question_search      # Search results
 ```
 Block/
 ├── Faq/
-│   ├── Home.php              # Category grid
-│   ├── Category/View.php     # Category detail
+│   ├── Home.php              # Category grid + search
+│   ├── Category/View.php     # Category question list
 │   ├── Question/
 │   │   ├── View.php          # Question display
-│   │   ├── AskForm.php       # Submission form (GDPR support)
-│   │   ├── Rating.php        # Voting widget
+│   │   ├── AskForm.php       # Submission form (GDPR + reCAPTCHA)
+│   │   ├── Rating.php        # Voting widget (3 modes)
 │   │   └── SocialShare.php   # Social buttons
+│   ├── Tag/
+│   │   ├── Cloud.php         # Tag cloud with size classes
+│   │   └── View.php          # Tag page question list
 │   ├── Search.php            # Search results
 │   ├── Breadcrumbs.php       # Navigation
-│   └── StructuredData.php    # JSON-LD injection
-└── Product/Questions.php     # Product tab integration
+│   ├── Hreflang.php          # Multi-store SEO tags
+│   └── StructuredData.php    # JSON-LD (FAQPage schema)
+├── Product/Questions.php     # Product tab + deep-link fix
+├── Widget/
+│   ├── QuestionsList.php     # CMS widget: questions
+│   ├── CategoriesList.php    # CMS widget: categories
+│   └── SearchBox.php         # CMS widget: search form
+└── Adminhtml/                # Admin form buttons
 ```
 
 ### Admin Interface
@@ -446,7 +490,12 @@ Yes, the module is compatible with Page Builder. You can link to FAQ pages or em
 
 **Q: Can I migrate FAQs from another platform?**
 
-While the module doesn't include a built-in import tool, you can use the REST API to bulk import questions and categories programmatically.
+Yes! Use the built-in CLI import command with a CSV file:
+```bash
+bin/magento magendoo:faq:import -e questions -f path/to/questions.csv
+bin/magento magendoo:faq:import -e categories -f path/to/categories.csv
+```
+The CSV header row must match the database column names. You can also use the REST API for programmatic imports.
 
 **Q: Is the FAQ content indexed by search engines?**
 
@@ -626,21 +675,49 @@ Create custom plugins in `app/code/Vendor/Module/etc/di.xml`:
 
 ## Changelog
 
-### [1.0.0] - 2024-XX-XX
+### [1.2.0] - 2026-04-13
 
-**Initial Release**
+**Phase 3+4 Features**
 
-- FAQ category management with multi-store support
-- Question workflow (pending → answered → rejected)
+- FAQ CMS Widgets — Questions List (list/accordion), Categories List, Search Box
+- Tag system frontend — tag cloud, tag pages with linked questions, Router support
+- Search autocomplete — AJAX suggest endpoint + JS dropdown on FAQ home
+- CSV Import/Export CLI — `magendoo:faq:export` and `magendoo:faq:import`
+- Product tab deep-link fix — `#product_faq` hash now reliably opens the tab
+- Complete REST API — 24 endpoints with 100% test coverage
+- Tag CRUD API + URL-key lookups + view count + notification endpoints
+
+### [1.1.0] - 2026-04-12
+
+**Phase 2 + SEO Sprint**
+
+- Ask a Question form on product pages (guest + logged-in)
+- reCAPTCHA integration via Magento's native framework
+- GDPR consent checkbox with configurable text
+- Email notifications (admin new question + customer answer)
+- Rating system — 3 modes (Yes/No, Voting, Average Stars)
+- Social share buttons (Facebook, Twitter, LinkedIn, Pinterest, Email)
+- Structured data JSON-LD (FAQPage schema) on question + category pages
+- Robots meta per entity (noindex/nofollow from DB fields)
+- XML Sitemap integration via ItemProviderInterface
+- Search terms logging + admin report
+- Hreflang tags for multi-store SEO
+- Customer group visibility filtering on all frontend surfaces
+- Product/category assignment in admin question form
+
+### [1.0.0] - 2026-04-10
+
+**Initial Release (Phase 1 MVP)**
+
+- 12 database tables with declarative schema
+- FAQ category + question + tag management (admin CRUD)
 - Product page FAQ tab integration
-- Advanced search with analytics
-- Rating and voting system
-- REST API endpoints
-- SEO features (sitemap, structured data, URL rewrites)
-- Email notifications
-- reCAPTCHA integration
-- GDPR compliance features
-- Multi-store and customer group restrictions
+- Custom URL router with SEO-friendly paths
+- Full-text search with pagination
+- REST API (category + question CRUD)
+- ACL permissions, admin menu, system configuration
+- URL rewrite generation + CLI reindex command
+- Multi-store support via junction tables
 
 ## License
 

@@ -26,5 +26,10 @@
                 </arguments>
             </block>
         </referenceContainer>
+        <referenceContainer name="head.additional">
+            <block class="Magendoo\Faq\Block\Faq\Hreflang" name="faq.home.hreflang"
+                   template="Magendoo_Faq::hreflang.phtml"
+                   ifconfig="magendoo_faq/seo/hreflang_enabled"/>
+        </referenceContainer>
     </body>
 </page>

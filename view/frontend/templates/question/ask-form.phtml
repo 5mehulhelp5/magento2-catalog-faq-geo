@@ -19,45 +19,62 @@
 <?php else: ?>
 <div class="faq-ask-form-wrapper">
     <h3 class="faq-ask-form-title"><?= $block->escapeHtml(__('Ask a Question')) ?></h3>
-    <form action="<?= $block->escapeUrl($block->getSubmitUrl()) ?>" method="post" id="faq-ask-form">
+    <form action="<?= $block->escapeUrl($block->getSubmitUrl()) ?>"
+          method="post" id="faq-ask-form" class="form faq-ask-form"
+          data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>">
         <?= $block->getBlockHtml('formkey') ?>
         <?php if ($block->getCurrentProductId()): ?>
             <input type="hidden" name="product_id" value="<?= (int)$block->getCurrentProductId() ?>"/>
         <?php endif; ?>
-        <div class="field required">
-            <label for="faq-ask-name"><?= $block->escapeHtml(__('Your Name')) ?></label>
-            <div class="control">
-                <input type="text" id="faq-ask-name" name="sender_name" required
-                       value="<?= $block->escapeHtmlAttr($block->getLoggedInCustomerName()) ?>"/>
+        <fieldset class="fieldset">
+            <div class="field required">
+                <label class="label" for="faq-ask-name">
+                    <span><?= $block->escapeHtml(__('Your Name')) ?></span>
+                </label>
+                <div class="control">
+                    <input type="text" id="faq-ask-name" name="sender_name"
+                           class="input-text" required
+                           value="<?= $block->escapeHtmlAttr($block->getLoggedInCustomerName()) ?>"/>
+                </div>
             </div>
-        </div>
-        <div class="field required">
-            <label for="faq-ask-email"><?= $block->escapeHtml(__('Email')) ?></label>
-            <div class="control">
-                <input type="email" id="faq-ask-email" name="sender_email" required
-                       value="<?= $block->escapeHtmlAttr($block->getLoggedInCustomerEmail()) ?>"/>
+            <div class="field required">
+                <label class="label" for="faq-ask-email">
+                    <span><?= $block->escapeHtml(__('Email')) ?></span>
+                </label>
+                <div class="control">
+                    <input type="email" id="faq-ask-email" name="sender_email"
+                           class="input-text" required
+                           value="<?= $block->escapeHtmlAttr($block->getLoggedInCustomerEmail()) ?>"/>
+                </div>
             </div>
-        </div>
-        <div class="field required">
-            <label for="faq-ask-title"><?= $block->escapeHtml(__('Your Question')) ?></label>
-            <div class="control">
-                <textarea id="faq-ask-title" name="title" rows="3" required></textarea>
+            <div class="field required">
+                <label class="label" for="faq-ask-title">
+                    <span><?= $block->escapeHtml(__('Your Question')) ?></span>
+                </label>
+                <div class="control">
+                    <textarea id="faq-ask-title" name="title"
+                              class="input-text" rows="4" required></textarea>
+                </div>
             </div>
-        </div>
-        <?php if ($block->isGdprEnabled()): ?>
-        <div class="field required faq-gdpr-consent">
-            <div class="control">
-                <input type="checkbox" id="faq-gdpr" name="gdpr_consent" value="1" required/>
-                <label for="faq-gdpr"><?= /* @noEscape */ $block->getGdprText() ?></label>
+            <?php if ($block->isGdprEnabled()): ?>
+            <div class="field required faq-gdpr-consent">
+                <div class="control">
+                    <input type="checkbox" id="faq-gdpr" name="gdpr_consent" value="1" required
+                           class="checkbox"/>
+                    <label class="label" for="faq-gdpr">
+                        <span><?= /* @noEscape */ $block->getGdprText() ?></span>
+                    </label>
+                </div>
             </div>
-        </div>
-        <?php endif; ?>
-        <?php /* Additional info slot — Magento ReCaptchaUi injects the
-                 reCAPTCHA widget here when the admin enables
-                 `recaptcha_frontend/type_for/magendoo_faq_question_submit`. */ ?>
+            <?php endif; ?>
+        </fieldset>
         <?= $block->getChildHtml('form_additional_info') ?>
         <div class="actions-toolbar">
-            <button type="submit" class="action primary"><?= $block->escapeHtml(__('Submit Question')) ?></button>
+            <div class="primary">
+                <button type="submit" class="action submit primary" title="<?= $block->escapeHtmlAttr(__('Submit Question')) ?>">
+                    <span><?= $block->escapeHtml(__('Submit Question')) ?></span>
+                </button>
+            </div>
         </div>
     </form>
 </div>

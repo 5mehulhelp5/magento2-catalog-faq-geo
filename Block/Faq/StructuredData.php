@@ -16,6 +16,7 @@ use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Api\QuestionRepositoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -63,12 +64,18 @@ class StructuredData extends Template
     private ?array $questionsCache = null;
 
     /**
+     * @var CustomerSession
+     */
+    private CustomerSession $customerSession;
+
+    /**
      * @param Context $context
      * @param FaqHelper $helper
      * @param QuestionRepositoryInterface $questionRepository
      * @param QuestionCollectionFactory $questionCollectionFactory
      * @param StoreManagerInterface $storeManager
      * @param LoggerInterface $logger
+     * @param CustomerSession $customerSession
      * @param array<string, mixed> $data
      */
     public function __construct(
@@ -78,6 +85,7 @@ class StructuredData extends Template
         QuestionCollectionFactory $questionCollectionFactory,
         StoreManagerInterface $storeManager,
         LoggerInterface $logger,
+        CustomerSession $customerSession,
         array $data = []
     ) {
         $this->helper = $helper;
@@ -85,6 +93,7 @@ class StructuredData extends Template
         $this->questionCollectionFactory = $questionCollectionFactory;
         $this->storeManager = $storeManager;
         $this->logger = $logger;
+        $this->customerSession = $customerSession;
         parent::__construct($context, $data);
     }
 
@@ -210,6 +219,7 @@ class StructuredData extends Template
             ->addVisibilityFilter(QuestionInterface::VISIBILITY_PUBLIC)
             ->addCategoryFilter($categoryId)
             ->addStoreFilter($storeId)
+            ->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId())
             ->setOrder('position', 'ASC');
 
         $items = [];

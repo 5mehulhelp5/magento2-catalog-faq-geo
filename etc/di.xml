@@ -33,6 +33,8 @@
                 type="Magendoo\Faq\Model\CategorySearchResults"/>
     <preference for="Magendoo\Faq\Api\Data\QuestionSearchResultsInterface"
                 type="Magendoo\Faq\Model\QuestionSearchResults"/>
+    <preference for="Magendoo\Faq\Api\Data\TagSearchResultsInterface"
+                type="Magendoo\Faq\Model\TagSearchResults"/>
 
     <!-- Console Command Registration -->
     <type name="Magento\Framework\Console\CommandList">
@@ -40,6 +42,10 @@
             <argument name="commands" xsi:type="array">
                 <item name="magendoo_faq_reindex"
                       xsi:type="object">Magendoo\Faq\Console\Command\ReindexCommand</item>
+                <item name="magendoo_faq_export"
+                      xsi:type="object">Magendoo\Faq\Console\Command\ExportCommand</item>
+                <item name="magendoo_faq_import"
+                      xsi:type="object">Magendoo\Faq\Console\Command\ImportCommand</item>
             </argument>
         </arguments>
     </type>

@@ -1,0 +1,27 @@
+<?php
+/**
+ * Magendoo Faq Tag Cloud Template
+ *
+ * @category  Magendoo
+ * @package   Magendoo_Faq
+ * @copyright Copyright (c) Magendoo (https://magendoo.com)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
+ */
+
+/** @var \Magendoo\Faq\Block\Faq\Tag\Cloud $block */
+?>
+<?php $tags = $block->getTags(); ?>
+<?php if (count($tags)): ?>
+<div class="faq-tag-cloud">
+    <h3 class="faq-tag-title"><?= $block->escapeHtml(__('Tags')) ?></h3>
+    <div class="faq-tags">
+        <?php foreach ($tags as $tag): ?>
+        <a href="<?= $block->escapeUrl($block->getTagUrl($tag)) ?>"
+           class="faq-tag <?= $block->escapeHtmlAttr($block->getTagSize($tag)) ?>">
+            <?= $block->escapeHtml($tag->getName()) ?>
+            <span class="count">(<?= (int) $block->getTagCount($tag) ?>)</span>
+        </a>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>

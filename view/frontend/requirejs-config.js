@@ -11,7 +11,9 @@ var config = {
     map: {
         '*': {
             faqSearch: 'Magendoo_Faq/js/faq-search',
-            faqRating: 'Magendoo_Faq/js/faq-rating'
+            faqRating: 'Magendoo_Faq/js/faq-rating',
+            faqAutocomplete: 'Magendoo_Faq/js/faq-autocomplete',
+            faqTabDeeplink: 'Magendoo_Faq/js/faq-tab-deeplink'
         }
     }
 };

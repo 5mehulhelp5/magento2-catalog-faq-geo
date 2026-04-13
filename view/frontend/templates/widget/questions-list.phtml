@@ -1,0 +1,35 @@
+<?php
+/**
+ * FAQ Questions List Widget Template
+ *
+ * @category  Magendoo
+ * @package   Magendoo_Faq
+ * @copyright Copyright (c) Magendoo (https://magendoo.com)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
+ */
+
+declare(strict_types=1);
+
+/** @var \Magendoo\Faq\Block\Widget\QuestionsList $block */
+?>
+<?php $questions = $block->getQuestions(); ?>
+<?php if ($questions->getSize()): ?>
+<div class="faq-widget faq-widget-questions">
+    <?php if ($block->getBlockTitle()): ?>
+    <h3 class="faq-widget-title"><?= $block->escapeHtml($block->getBlockTitle()) ?></h3>
+    <?php endif; ?>
+    <ul class="faq-widget-list">
+        <?php foreach ($questions as $question): ?>
+        <li class="faq-widget-item">
+            <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>"
+               class="faq-widget-link">
+                <?= $block->escapeHtml($question->getTitle()) ?>
+            </a>
+            <?php if ($block->showAnswer()): ?>
+            <p class="faq-widget-answer"><?= $block->escapeHtml($block->getAnswerPreview($question)) ?></p>
+            <?php endif; ?>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+<?php endif; ?>

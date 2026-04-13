@@ -19,6 +19,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\ResourceModel\Category as CategoryResource;
 use Magendoo\Faq\Model\ResourceModel\Question as QuestionResource;
+use Magendoo\Faq\Model\ResourceModel\Tag as TagResource;
 
 /**
  * FAQ custom URL router
@@ -46,6 +47,11 @@ class Router implements RouterInterface
     protected QuestionResource $questionResource;
 
     /**
+     * @var TagResource
+     */
+    protected TagResource $tagResource;
+
+    /**
      * @var StoreManagerInterface
      */
     protected StoreManagerInterface $storeManager;
@@ -55,6 +61,7 @@ class Router implements RouterInterface
      * @param FaqHelper $faqHelper
      * @param CategoryResource $categoryResource
      * @param QuestionResource $questionResource
+     * @param TagResource $tagResource
      * @param StoreManagerInterface $storeManager
      */
     public function __construct(
@@ -62,12 +69,14 @@ class Router implements RouterInterface
         FaqHelper $faqHelper,
         CategoryResource $categoryResource,
         QuestionResource $questionResource,
+        TagResource $tagResource,
         StoreManagerInterface $storeManager
     ) {
         $this->actionFactory = $actionFactory;
         $this->faqHelper = $faqHelper;
         $this->categoryResource = $categoryResource;
         $this->questionResource = $questionResource;
+        $this->tagResource = $tagResource;
         $this->storeManager = $storeManager;
     }
 
@@ -118,8 +127,22 @@ class Router implements RouterInterface
             return $this->actionFactory->create(\Magento\Framework\App\Action\Forward::class);
         }
 
-        $storeId = (int) $this->storeManager->getStore()->getId();
         $segments = explode('/', $path);
+
+        // Tag page: tag/{url-key}
+        if (count($segments) === 2 && $segments[0] === 'tag') {
+            $tagUrlKey = $segments[1];
+            $tagId = $this->lookupTagId($tagUrlKey);
+            if ($tagId) {
+                $request->setModuleName('faq')
+                    ->setControllerName('tag')
+                    ->setActionName('view')
+                    ->setParam('id', $tagId);
+                return $this->actionFactory->create(\Magento\Framework\App\Action\Forward::class);
+            }
+        }
+
+        $storeId = (int) $this->storeManager->getStore()->getId();
 
         // Single segment: category URL key
         if (count($segments) === 1) {
@@ -151,5 +174,23 @@ class Router implements RouterInterface
         }
 
         return null;
+    }
+
+    /**
+     * Look up tag ID by URL key
+     *
+     * @param string $urlKey
+     * @return int|null
+     */
+    private function lookupTagId(string $urlKey): ?int
+    {
+        $connection = $this->tagResource->getConnection();
+        $select = $connection->select()
+            ->from($this->tagResource->getMainTable(), ['tag_id'])
+            ->where('url_key = ?', $urlKey)
+            ->limit(1);
+        $tagId = $connection->fetchOne($select);
+
+        return $tagId ? (int) $tagId : null;
     }
 }

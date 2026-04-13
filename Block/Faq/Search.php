@@ -15,6 +15,7 @@ namespace Magendoo\Faq\Block\Faq;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
@@ -40,10 +41,16 @@ class Search extends Template
     private StoreManagerInterface $storeManager;
 
     /**
+     * @var CustomerSession
+     */
+    private CustomerSession $customerSession;
+
+    /**
      * @param Context $context
      * @param QuestionCollectionFactory $questionCollectionFactory
      * @param FaqHelper $helper
      * @param StoreManagerInterface $storeManager
+     * @param CustomerSession $customerSession
      * @param array<string, mixed> $data
      */
     public function __construct(
@@ -51,11 +58,13 @@ class Search extends Template
         QuestionCollectionFactory $questionCollectionFactory,
         FaqHelper $helper,
         StoreManagerInterface $storeManager,
+        CustomerSession $customerSession,
         array $data = []
     ) {
         $this->questionCollectionFactory = $questionCollectionFactory;
         $this->helper = $helper;
         $this->storeManager = $storeManager;
+        $this->customerSession = $customerSession;
         parent::__construct($context, $data);
     }
 
@@ -84,6 +93,7 @@ class Search extends Template
 
         $storeId = (int) $this->storeManager->getStore()->getId();
         $collection->addStoreFilter($storeId);
+        $collection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
 
         if ($query !== '') {
             $collection->addSearchFilter($query);

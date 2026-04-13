@@ -1,0 +1,16 @@
+<?php
+/**
+ * Magendoo Faq Hreflang Template
+ *
+ * @category  Magendoo
+ * @package   Magendoo_Faq
+ * @copyright Copyright (c) Magendoo (https://magendoo.com)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
+ */
+
+/** @var \Magendoo\Faq\Block\Faq\Hreflang $block */
+?>
+<?php $links = $block->getHreflangLinks(); ?>
+<?php foreach ($links as $link): ?>
+<link rel="alternate" hreflang="<?= $block->escapeHtmlAttr($link['hreflang']) ?>" href="<?= $block->escapeUrl($link['href']) ?>"/>
+<?php endforeach; ?>

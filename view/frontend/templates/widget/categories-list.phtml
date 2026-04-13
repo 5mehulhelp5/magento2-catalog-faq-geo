@@ -1,0 +1,35 @@
+<?php
+/**
+ * FAQ Categories List Widget Template
+ *
+ * @category  Magendoo
+ * @package   Magendoo_Faq
+ * @copyright Copyright (c) Magendoo (https://magendoo.com)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
+ */
+
+declare(strict_types=1);
+
+/** @var \Magendoo\Faq\Block\Widget\CategoriesList $block */
+?>
+<?php $categories = $block->getCategories(); ?>
+<?php if ($categories->getSize()): ?>
+<div class="faq-widget faq-widget-categories">
+    <?php if ($block->getBlockTitle()): ?>
+    <h3 class="faq-widget-title"><?= $block->escapeHtml($block->getBlockTitle()) ?></h3>
+    <?php endif; ?>
+    <ul class="faq-widget-list">
+        <?php foreach ($categories as $category): ?>
+        <li class="faq-widget-item">
+            <a href="<?= $block->escapeUrl($block->getCategoryUrl($category)) ?>"
+               class="faq-widget-link">
+                <?= $block->escapeHtml($category->getName()) ?>
+                <?php if ($block->showQuestionCount()): ?>
+                <span class="count">(<?= (int) $block->getQuestionCount($category) ?>)</span>
+                <?php endif; ?>
+            </a>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+<?php endif; ?>

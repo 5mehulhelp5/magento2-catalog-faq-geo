@@ -21,6 +21,7 @@
         </referenceContainer>
         <referenceContainer name="head.additional">
             <block class="Magendoo\Faq\Block\Faq\StructuredData" name="faq.structured.data" template="Magendoo_Faq::structured-data.phtml" ifconfig="magendoo_faq/seo/structured_data_enabled"/>
+            <block class="Magendoo\Faq\Block\Faq\Hreflang" name="faq.question.hreflang" template="Magendoo_Faq::hreflang.phtml" ifconfig="magendoo_faq/seo/hreflang_enabled"/>
         </referenceContainer>
     </body>
 </page>

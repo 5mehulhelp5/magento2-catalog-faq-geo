@@ -1,0 +1,33 @@
+<?php
+/**
+ * Magendoo Faq Tag View Template
+ *
+ * @category  Magendoo
+ * @package   Magendoo_Faq
+ * @copyright Copyright (c) Magendoo (https://magendoo.com)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
+ */
+
+/** @var \Magendoo\Faq\Block\Faq\Tag\View $block */
+?>
+<?php $tag = $block->getTag(); ?>
+<?php if ($tag): ?>
+<div class="faq-tag-view">
+    <div class="faq-questions-list">
+        <?php $questions = $block->getQuestions(); ?>
+        <?php if ($questions && $questions->getSize()): ?>
+            <?php foreach ($questions as $question): ?>
+            <div class="faq-question-item">
+                <h3 class="faq-question-title">
+                    <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>">
+                        <?= $block->escapeHtml($question->getTitle()) ?>
+                    </a>
+                </h3>
+            </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p><?= $block->escapeHtml(__('No questions with this tag.')) ?></p>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>

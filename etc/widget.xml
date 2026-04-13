@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Magendoo FAQ Widget Configuration
+ *
+ * @category  Magendoo
+ * @package   Magendoo_Faq
+ * @copyright Copyright (c) Magendoo (https://magendoo.com)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
+ */
+-->
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+    <widget id="magendoo_faq_questions_list" class="Magendoo\Faq\Block\Widget\QuestionsList">
+        <label translate="true">FAQ Questions List</label>
+        <description translate="true">Displays a list of FAQ questions, optionally filtered by category</description>
+        <parameters>
+            <parameter name="title" xsi:type="text" visible="true" sort_order="10">
+                <label translate="true">Block Title</label>
+                <value>Frequently Asked Questions</value>
+            </parameter>
+            <parameter name="category_id" xsi:type="text" visible="true" sort_order="20">
+                <label translate="true">FAQ Category ID (leave empty for all)</label>
+            </parameter>
+            <parameter name="question_count" xsi:type="text" visible="true" sort_order="30">
+                <label translate="true">Number of Questions</label>
+                <value>5</value>
+            </parameter>
+            <parameter name="show_answer" xsi:type="select" visible="true" sort_order="40">
+                <label translate="true">Show Answer Preview</label>
+                <options>
+                    <option name="yes" value="1">
+                        <label translate="true">Yes</label>
+                    </option>
+                    <option name="no" value="0" selected="true">
+                        <label translate="true">No</label>
+                    </option>
+                </options>
+            </parameter>
+            <parameter name="template" xsi:type="select" visible="true" sort_order="50">
+                <label translate="true">Template</label>
+                <options>
+                    <option name="list" value="Magendoo_Faq::widget/questions-list.phtml" selected="true">
+                        <label translate="true">List</label>
+                    </option>
+                    <option name="accordion" value="Magendoo_Faq::widget/questions-accordion.phtml">
+                        <label translate="true">Accordion</label>
+                    </option>
+                </options>
+            </parameter>
+        </parameters>
+    </widget>
+
+    <widget id="magendoo_faq_categories_list" class="Magendoo\Faq\Block\Widget\CategoriesList">
+        <label translate="true">FAQ Categories List</label>
+        <description translate="true">Displays a list of FAQ categories with links</description>
+        <parameters>
+            <parameter name="title" xsi:type="text" visible="true" sort_order="10">
+                <label translate="true">Block Title</label>
+                <value>FAQ Categories</value>
+            </parameter>
+            <parameter name="show_question_count" xsi:type="select" visible="true" sort_order="20">
+                <label translate="true">Show Question Count</label>
+                <options>
+                    <option name="yes" value="1" selected="true">
+                        <label translate="true">Yes</label>
+                    </option>
+                    <option name="no" value="0">
+                        <label translate="true">No</label>
+                    </option>
+                </options>
+            </parameter>
+            <parameter name="template" xsi:type="select" visible="true" sort_order="30">
+                <label translate="true">Template</label>
+                <options>
+                    <option name="default" value="Magendoo_Faq::widget/categories-list.phtml" selected="true">
+                        <label translate="true">Default</label>
+                    </option>
+                </options>
+            </parameter>
+        </parameters>
+    </widget>
+
+    <widget id="magendoo_faq_search_box" class="Magendoo\Faq\Block\Widget\SearchBox">
+        <label translate="true">FAQ Search Box</label>
+        <description translate="true">Displays a FAQ search form</description>
+        <parameters>
+            <parameter name="placeholder" xsi:type="text" visible="true" sort_order="10">
+                <label translate="true">Placeholder Text</label>
+                <value>Search FAQ...</value>
+            </parameter>
+            <parameter name="template" xsi:type="select" visible="true" sort_order="20">
+                <label translate="true">Template</label>
+                <options>
+                    <option name="default" value="Magendoo_Faq::widget/search-box.phtml" selected="true">
+                        <label translate="true">Default</label>
+                    </option>
+                </options>
+            </parameter>
+        </parameters>
+    </widget>
+</widgets>

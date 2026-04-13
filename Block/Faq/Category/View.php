@@ -17,6 +17,7 @@ use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -42,6 +43,11 @@ class View extends Template
     private FaqHelper $helper;
 
     /**
+     * @var CustomerSession
+     */
+    private CustomerSession $customerSession;
+
+    /**
      * @var CategoryInterface|null
      */
     private ?CategoryInterface $category = null;
@@ -51,6 +57,7 @@ class View extends Template
      * @param QuestionCollectionFactory $questionCollectionFactory
      * @param CategoryRepositoryInterface $categoryRepository
      * @param FaqHelper $helper
+     * @param CustomerSession $customerSession
      * @param array<string, mixed> $data
      */
     public function __construct(
@@ -58,11 +65,13 @@ class View extends Template
         QuestionCollectionFactory $questionCollectionFactory,
         CategoryRepositoryInterface $categoryRepository,
         FaqHelper $helper,
+        CustomerSession $customerSession,
         array $data = []
     ) {
         $this->questionCollectionFactory = $questionCollectionFactory;
         $this->categoryRepository = $categoryRepository;
         $this->helper = $helper;
+        $this->customerSession = $customerSession;
         parent::__construct($context, $data);
     }
 
@@ -105,6 +114,7 @@ class View extends Template
 
         $storeId = (int) $this->_storeManager->getStore()->getId();
         $collection->addStoreFilter($storeId);
+        $collection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
 
         $sortBy = $this->helper->getSortQuestionsBy();
         if ($sortBy === 'name' || $sortBy === 'title') {

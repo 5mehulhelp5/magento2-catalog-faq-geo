@@ -15,6 +15,7 @@ namespace Magendoo\Faq\Block\Product;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -40,6 +41,11 @@ class Questions extends Template
     private Registry $registry;
 
     /**
+     * @var CustomerSession
+     */
+    private CustomerSession $customerSession;
+
+    /**
      * @var \Magendoo\Faq\Model\ResourceModel\Question\Collection|null
      */
     private ?\Magendoo\Faq\Model\ResourceModel\Question\Collection $questionCollection = null;
@@ -49,6 +55,7 @@ class Questions extends Template
      * @param QuestionCollectionFactory $questionCollectionFactory
      * @param FaqHelper $helper
      * @param Registry $registry
+     * @param CustomerSession $customerSession
      * @param array<string, mixed> $data
      */
     public function __construct(
@@ -56,11 +63,13 @@ class Questions extends Template
         QuestionCollectionFactory $questionCollectionFactory,
         FaqHelper $helper,
         Registry $registry,
+        CustomerSession $customerSession,
         array $data = []
     ) {
         $this->questionCollectionFactory = $questionCollectionFactory;
         $this->helper = $helper;
         $this->registry = $registry;
+        $this->customerSession = $customerSession;
         parent::__construct($context, $data);
     }
 
@@ -83,6 +92,7 @@ class Questions extends Template
 
             $storeId = (int) $this->_storeManager->getStore()->getId();
             $this->questionCollection->addStoreFilter($storeId);
+            $this->questionCollection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
 
             $limit = $this->helper->getProductQuestionsLimit();
             if ($limit > 0) {

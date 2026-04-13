@@ -14,7 +14,7 @@
     <?php /* Page title rendered by default Magento page-title-wrapper block. */ ?>
 
     <?php if ($block->isSearchBoxEnabled()): ?>
-    <div class="faq-search">
+    <div class="faq-search" data-mage-init='{"faqAutocomplete": {"suggestUrl": "<?= $block->escapeUrl($block->getUrl('faq/question/suggest')) ?>"}}'>
         <form action="<?= $block->escapeUrl($block->getSearchUrl()) ?>" method="get">
             <div class="field search">
                 <input type="text" name="q" placeholder="<?= $block->escapeHtmlAttr(__('Search FAQ...')) ?>"

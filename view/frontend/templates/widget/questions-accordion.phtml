@@ -1,0 +1,35 @@
+<?php
+/**
+ * FAQ Questions Accordion Widget Template
+ *
+ * @category  Magendoo
+ * @package   Magendoo_Faq
+ * @copyright Copyright (c) Magendoo (https://magendoo.com)
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
+ */
+
+declare(strict_types=1);
+
+/** @var \Magendoo\Faq\Block\Widget\QuestionsList $block */
+?>
+<?php $questions = $block->getQuestions(); ?>
+<?php if ($questions->getSize()): ?>
+<div class="faq-widget faq-widget-accordion"
+     data-mage-init='{"accordion":{"openedState":"active","active":false}}'>
+    <?php if ($block->getBlockTitle()): ?>
+    <h3 class="faq-widget-title"><?= $block->escapeHtml($block->getBlockTitle()) ?></h3>
+    <?php endif; ?>
+    <?php foreach ($questions as $question): ?>
+    <div class="faq-accordion-item" data-role="collapsible">
+        <div class="faq-accordion-title" data-role="trigger">
+            <strong><?= $block->escapeHtml($question->getTitle()) ?></strong>
+        </div>
+        <div class="faq-accordion-content" data-role="content">
+            <p><?= $block->escapeHtml($block->getAnswerPreview($question)) ?></p>
+            <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>"
+               class="read-more"><?= $block->escapeHtml(__('Read More')) ?></a>
+        </div>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>

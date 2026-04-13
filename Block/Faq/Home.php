@@ -15,6 +15,7 @@ namespace Magendoo\Faq\Block\Faq;
 use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -34,19 +35,27 @@ class Home extends Template
     private FaqHelper $helper;
 
     /**
+     * @var CustomerSession
+     */
+    private CustomerSession $customerSession;
+
+    /**
      * @param Context $context
      * @param CategoryCollectionFactory $categoryCollectionFactory
      * @param FaqHelper $helper
+     * @param CustomerSession $customerSession
      * @param array<string, mixed> $data
      */
     public function __construct(
         Context $context,
         CategoryCollectionFactory $categoryCollectionFactory,
         FaqHelper $helper,
+        CustomerSession $customerSession,
         array $data = []
     ) {
         $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->helper = $helper;
+        $this->customerSession = $customerSession;
         parent::__construct($context, $data);
     }
 
@@ -62,6 +71,7 @@ class Home extends Template
 
         $storeId = (int) $this->_storeManager->getStore()->getId();
         $collection->addStoreFilter($storeId);
+        $collection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
 
         $sortBy = $this->helper->getSortCategoriesBy();
         if ($sortBy === 'name') {

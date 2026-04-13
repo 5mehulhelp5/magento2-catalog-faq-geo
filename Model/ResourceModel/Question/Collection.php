@@ -141,7 +141,7 @@ class Collection extends AbstractCollection
     }
 
     /**
-     * Add customer group filter
+     * Add customer group filter (strict — only rows linked to this exact group).
      *
      * @param int $groupId
      * @return $this
@@ -153,6 +153,26 @@ class Collection extends AbstractCollection
             'main_table.question_id = q_group.question_id',
             []
         )->where('q_group.customer_group_id = ?', $groupId);
+
+        return $this;
+    }
+
+    /**
+     * Add customer-group visibility filter (lenient).
+     *
+     * Shows questions that either:
+     *  - have NO rows in the customer_group junction (visible to everyone), OR
+     *  - have a row matching the given group ID.
+     *
+     * @param int $groupId Current customer's group ID.
+     * @return $this
+     */
+    public function addCustomerGroupVisibilityFilter(int $groupId): static
+    {
+        $junction = $this->getTable('magendoo_faq_question_customer_group');
+        $noRestriction = "NOT EXISTS (SELECT 1 FROM {$junction} qcg WHERE qcg.question_id = main_table.question_id)";
+        $matchesGroup = "EXISTS (SELECT 1 FROM {$junction} qcg WHERE qcg.question_id = main_table.question_id AND qcg.customer_group_id = " . (int) $groupId . ')';
+        $this->getSelect()->where("({$noRestriction}) OR ({$matchesGroup})");
 
         return $this;
     }

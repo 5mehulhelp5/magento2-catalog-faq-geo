@@ -31,3 +31,15 @@
 
     <?= $block->getChildHtml('ask_form') ?>
 </div>
+<?php /* Deep-link fix: when URL hash is #product_faq, Luma's tabs widget
+         marks the tab title as active but doesn't reliably show the content
+         panel. This component runs after widget init and forces the content
+         visible. Target is the parent <div id="product_faq"> created by
+         Magento's details.phtml — we reference it by CSS selector. */ ?>
+<script type="text/x-magento-init">
+{
+    "#product_faq": {
+        "faqTabDeeplink": {}
+    }
+}
+</script>
