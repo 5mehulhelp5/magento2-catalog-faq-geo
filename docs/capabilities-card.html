@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8f9fa;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    max-width: 780px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 28px 32px 22px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .header .sub {
+    font-size: 12px;
+    color: #8ec5fc;
+    font-weight: 400;
+  }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-blue { background: rgba(142,197,252,0.2); color: #8ec5fc; }
+  .badge-green { background: rgba(76,175,80,0.2); color: #81c784; }
+  .badge-orange { background: rgba(255,167,38,0.2); color: #ffb74d; }
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .col {
+    padding: 22px 28px 20px;
+  }
+  .col:first-child {
+    border-right: 1px solid #f0f0f0;
+  }
+  .col-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+    margin-bottom: 12px;
+  }
+  .col-title .icon { margin-right: 4px; }
+  ul {
+    list-style: none;
+  }
+  li {
+    font-size: 12.5px;
+    color: #444;
+    padding: 4px 0;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.45;
+  }
+  li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .col:first-child li::before { background: #e91e63; }
+  .col:last-child li::before { background: #2196f3; }
+  .stats {
+    background: #fafbfc;
+    border-top: 1px solid #f0f0f0;
+    padding: 14px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a1a2e;
+  }
+  .stat-label {
+    font-size: 9.5px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+  }
+  .footer {
+    padding: 12px 28px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-left {
+    font-size: 10.5px;
+    color: #888;
+  }
+  .footer-left a {
+    color: #2196f3;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .footer-right {
+    font-size: 10px;
+    color: #aaa;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <h1>Magendoo FAQ & Product Questions for Magento 2</h1>
+    <div class="sub">Open Source &middot; GEO-Ready &middot; Headless-Compatible</div>
+    <div class="badge-row">
+      <span class="badge badge-blue">Magento 2.4.x</span>
+      <span class="badge badge-green">PHP 8.1+</span>
+      <span class="badge badge-orange">OSL-3.0</span>
+      <span class="badge badge-blue">Schema.org FAQPage</span>
+      <span class="badge badge-green">24 REST APIs</span>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="col">
+      <div class="col-title"><span class="icon">&#x1F4C8;</span> Marketing & SEO</div>
+      <ul>
+        <li>FAQPage JSON-LD structured data for Google rich results & AI citation</li>
+        <li>XML sitemap integration — auto-indexed knowledge base</li>
+        <li>Hreflang tags for multi-region, multi-language stores</li>
+        <li>Search term analytics — discover content gaps</li>
+        <li>Product-page Q&A — address objections at point of purchase</li>
+        <li>Social sharing + helpfulness ratings for engagement</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="col-title"><span class="icon">&#x2699;</span> Technical</div>
+      <ul>
+        <li>24 REST endpoints — full headless / PWA support</li>
+        <li>Native reCAPTCHA, GDPR consent, ACL permissions</li>
+        <li>Customer group visibility for B2B/B2C segmentation</li>
+        <li>CMS widgets: embed FAQ on any page</li>
+        <li>CSV import/export + CLI tools</li>
+        <li>90 Playwright E2E tests with 100% API coverage</li>
+      </ul>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">24</div><div class="stat-label">API Endpoints</div></div>
+    <div class="stat"><div class="stat-num">12</div><div class="stat-label">DB Tables</div></div>
+    <div class="stat"><div class="stat-num">170+</div><div class="stat-label">Module Files</div></div>
+    <div class="stat"><div class="stat-num">90</div><div class="stat-label">E2E Tests</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">CMS Widgets</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">API Test Coverage</div></div>
+  </div>
+  <div class="footer">
+    <div class="footer-left"><a href="https://github.com/magendooro/magento2-catalog-faq-geo">github.com/magendooro/magento2-catalog-faq-geo</a></div>
+    <div class="footer-right">Implementation & customization: info@magendoo.ro</div>
+  </div>
+</div>
+</body>
+</html>
