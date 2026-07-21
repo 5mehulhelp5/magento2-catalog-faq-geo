@@ -2,7 +2,7 @@
 
 [![Magento 2](https://img.shields.io/badge/Magento-2.4.x-orange.svg)](https://magento.com)
 [![PHP](https://img.shields.io/badge/PHP-8.0%2B-blue.svg)](https://php.net)
-[![License](https://img.shields.io/badge/License-OSL--3.0-green.svg)](https://opensource.org/licenses/OSL-3.0)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 A comprehensive FAQ and Product Questions management system for Magento 2 that transforms customer support into a conversion driver through SEO-optimized knowledge bases, product-specific Q&A, and customer engagement tools.
 
@@ -735,7 +735,7 @@ Create custom plugins in `app/code/Vendor/Module/etc/di.xml`:
 
 ## License
 
-This module is licensed under the **Open Software License v. 3.0 (OSL-3.0)**.
+This module is licensed under the **MIT License**.
 
 See https://opensource.org/licenses/OSL-3.0 for the full license text.
 
