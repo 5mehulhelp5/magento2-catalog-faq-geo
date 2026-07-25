@@ -15,9 +15,12 @@ namespace Magendoo\Faq\Controller\Adminhtml\Question;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filter\FilterManager;
+use Magento\Store\Model\ScopeInterface;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Api\QuestionManagementInterface;
 use Magendoo\Faq\Api\QuestionRepositoryInterface;
@@ -32,6 +35,11 @@ class Save extends Action implements HttpPostActionInterface
      * Authorization resource
      */
     public const ADMIN_RESOURCE = 'Magendoo_Faq::question_edit';
+
+    /**
+     * Config path gating customer answer notifications (see Model\Email\Sender)
+     */
+    private const XML_PATH_USER_NOTIFICATIONS_ENABLED = 'magendoo_faq/user_notifications/enabled';
 
     /**
      * @var QuestionRepositoryInterface
@@ -54,23 +62,39 @@ class Save extends Action implements HttpPostActionInterface
     protected FilterManager $filterManager;
 
     /**
+     * @var DataPersistorInterface
+     */
+    protected DataPersistorInterface $dataPersistor;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    protected ScopeConfigInterface $scopeConfig;
+
+    /**
      * @param Context $context
      * @param QuestionRepositoryInterface $questionRepository
      * @param QuestionManagementInterface $questionManagement
      * @param QuestionFactory $questionFactory
      * @param FilterManager $filterManager
+     * @param DataPersistorInterface $dataPersistor
+     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         Context $context,
         QuestionRepositoryInterface $questionRepository,
         QuestionManagementInterface $questionManagement,
         QuestionFactory $questionFactory,
-        FilterManager $filterManager
+        FilterManager $filterManager,
+        DataPersistorInterface $dataPersistor,
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->questionRepository = $questionRepository;
         $this->questionManagement = $questionManagement;
         $this->questionFactory = $questionFactory;
         $this->filterManager = $filterManager;
+        $this->dataPersistor = $dataPersistor;
+        $this->scopeConfig = $scopeConfig;
         parent::__construct($context);
     }
 
@@ -158,17 +182,11 @@ class Save extends Action implements HttpPostActionInterface
 
             // Send answer notification email if requested
             if (!empty($data['send_email'])) {
-                try {
-                    $this->questionManagement->sendAnswerNotification($question->getQuestionId());
-                    $this->messageManager->addSuccessMessage(__('Answer notification email has been sent.'));
-                } catch (\Exception $e) {
-                    $this->messageManager->addErrorMessage(
-                        __('The question was saved but the notification email failed: %1', $e->getMessage())
-                    );
-                }
+                $this->sendAnswerNotification($question);
             }
 
             $this->messageManager->addSuccessMessage(__('The question has been saved.'));
+            $this->dataPersistor->clear('faq_question');
 
             if ($this->getRequest()->getParam('back')) {
                 return $resultRedirect->setPath('*/*/edit', ['question_id' => $question->getQuestionId()]);
@@ -181,6 +199,11 @@ class Save extends Action implements HttpPostActionInterface
             $this->messageManager->addExceptionMessage($e, __('Something went wrong while saving the question.'));
         }
 
+        // Keep the submitted values so the form DataProvider can restore
+        // them after the redirect (see
+        // \Magento\Cms\Controller\Adminhtml\Page\Save::execute()).
+        $this->dataPersistor->set('faq_question', $data);
+
         // Redirect back with data
         $redirectParams = ['_current' => true, '_use_forward' => false];
         if ($questionId) {
@@ -188,5 +211,53 @@ class Save extends Action implements HttpPostActionInterface
         }
 
         return $resultRedirect->setPath('*/*/edit', $redirectParams);
+    }
+
+    /**
+     * Send the answer notification email and report an honest outcome.
+     *
+     * Model\Email\Sender returns false without throwing when notifications
+     * are disabled, when the sender/template config or the recipient address
+     * is missing, or when the transport fails — so the boolean result must
+     * be checked before claiming the email was sent.
+     *
+     * @param QuestionInterface $question
+     * @return void
+     */
+    private function sendAnswerNotification(QuestionInterface $question): void
+    {
+        if (!$this->scopeConfig->isSetFlag(self::XML_PATH_USER_NOTIFICATIONS_ENABLED, ScopeInterface::SCOPE_STORE)) {
+            $this->messageManager->addWarningMessage(
+                __(
+                    'The notification email was not sent: user notifications are disabled in'
+                    . ' configuration (Stores > Configuration > Magendoo Extensions > FAQ > User Notifications).'
+                )
+            );
+            return;
+        }
+
+        if (!$question->getSenderEmail()) {
+            $this->messageManager->addWarningMessage(
+                __('The notification email was not sent: the question has no sender email address.')
+            );
+            return;
+        }
+
+        try {
+            if ($this->questionManagement->sendAnswerNotification((int) $question->getQuestionId())) {
+                $this->messageManager->addSuccessMessage(__('Answer notification email has been sent.'));
+            } else {
+                $this->messageManager->addErrorMessage(
+                    __(
+                        'The question was saved but the notification email could not be sent.'
+                        . ' Check the FAQ email sender and template configuration and the error log.'
+                    )
+                );
+            }
+        } catch (\Exception $e) {
+            $this->messageManager->addErrorMessage(
+                __('The question was saved but the notification email failed: %1', $e->getMessage())
+            );
+        }
     }
 }

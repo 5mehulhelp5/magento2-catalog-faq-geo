@@ -14,7 +14,9 @@ namespace Magendoo\Faq\Controller\Adminhtml\Category;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Catalog\Model\ImageUploader;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magendoo\Faq\Api\CategoryRepositoryInterface;
@@ -42,17 +44,33 @@ class Save extends Action implements HttpPostActionInterface
     protected CategoryFactory $categoryFactory;
 
     /**
+     * @var DataPersistorInterface
+     */
+    protected DataPersistorInterface $dataPersistor;
+
+    /**
+     * @var ImageUploader
+     */
+    protected ImageUploader $imageUploader;
+
+    /**
      * @param Context $context
      * @param CategoryRepositoryInterface $categoryRepository
      * @param CategoryFactory $categoryFactory
+     * @param DataPersistorInterface $dataPersistor
+     * @param ImageUploader $imageUploader
      */
     public function __construct(
         Context $context,
         CategoryRepositoryInterface $categoryRepository,
-        CategoryFactory $categoryFactory
+        CategoryFactory $categoryFactory,
+        DataPersistorInterface $dataPersistor,
+        ImageUploader $imageUploader
     ) {
         $this->categoryRepository = $categoryRepository;
         $this->categoryFactory = $categoryFactory;
+        $this->dataPersistor = $dataPersistor;
+        $this->imageUploader = $imageUploader;
         parent::__construct($context);
     }
 
@@ -84,7 +102,26 @@ class Save extends Action implements HttpPostActionInterface
             $category->setPageTitle($data['page_title'] ?? null);
             $category->setUrlKey($data['url_key'] ?? null);
             $category->setDescription($data['description'] ?? null);
-            $category->setIcon($data['icon'] ?? null);
+
+            // The icon comes from the fileUploader component as an array of
+            // file info. A freshly uploaded file carries `tmp_name` and must
+            // be moved out of the tmp media directory (same contract as
+            // \Magento\Catalog\Model\Category\Attribute\Backend\Image). When
+            // the key is absent from the POST the stored value is kept as is.
+            if (array_key_exists('icon', $data)) {
+                if (is_array($data['icon']) && isset($data['icon'][0]['name'])) {
+                    $iconName = (string) $data['icon'][0]['name'];
+                    if (isset($data['icon'][0]['tmp_name'])) {
+                        $iconName = $this->moveIconFromTmp($iconName);
+                        $data['icon'][0]['name'] = $iconName;
+                        unset($data['icon'][0]['tmp_name']);
+                    }
+                    $category->setIcon($iconName);
+                } elseif (empty($data['icon'])) {
+                    $category->setIcon(null);
+                }
+            }
+
             $category->setPosition((int) ($data['position'] ?? 0));
             $category->setStatus((int) ($data['status'] ?? CategoryInterface::STATUS_ENABLED));
             $category->setMetaTitle($data['meta_title'] ?? null);
@@ -102,6 +139,7 @@ class Save extends Action implements HttpPostActionInterface
             $category = $this->categoryRepository->save($category);
 
             $this->messageManager->addSuccessMessage(__('The category has been saved.'));
+            $this->dataPersistor->clear('faq_category');
 
             if ($this->getRequest()->getParam('back')) {
                 return $resultRedirect->setPath('*/*/edit', ['category_id' => $category->getCategoryId()]);
@@ -114,6 +152,11 @@ class Save extends Action implements HttpPostActionInterface
             $this->messageManager->addExceptionMessage($e, __('Something went wrong while saving the category.'));
         }
 
+        // Keep the submitted values so the form DataProvider can restore
+        // them after the redirect (see
+        // \Magento\Cms\Controller\Adminhtml\Page\Save::execute()).
+        $this->dataPersistor->set('faq_category', $data);
+
         // Redirect back with data
         $redirectParams = ['_current' => true, '_use_forward' => false];
         if ($categoryId) {
@@ -121,5 +164,23 @@ class Save extends Action implements HttpPostActionInterface
         }
 
         return $resultRedirect->setPath('*/*/edit', $redirectParams);
+    }
+
+    /**
+     * Move a freshly uploaded icon from the tmp media path to its final location.
+     *
+     * The file may be renamed on the way to keep the target name unique, so
+     * the resulting file name is taken from the returned relative path.
+     *
+     * @param string $iconName
+     * @return string
+     * @throws LocalizedException
+     */
+    private function moveIconFromTmp(string $iconName): string
+    {
+        $newRelativePath = $this->imageUploader->moveFileFromTmp($iconName, true);
+        $parts = explode('/', $newRelativePath);
+
+        return (string) end($parts);
     }
 }

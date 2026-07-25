@@ -36,7 +36,7 @@
             </storageConfig>
             <updateUrl path="mui/index/render"/>
         </settings>
-        <aclResource>Magendoo_Faq::categories</aclResource>
+        <aclResource>Magendoo_Faq::category</aclResource>
         <dataProvider class="Magendoo\Faq\Ui\DataProvider\CategoryDataProvider" name="faq_category_listing_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>

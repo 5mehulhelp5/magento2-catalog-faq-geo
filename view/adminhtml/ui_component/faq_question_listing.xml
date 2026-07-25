@@ -36,7 +36,7 @@
             </storageConfig>
             <updateUrl path="mui/index/render"/>
         </settings>
-        <aclResource>Magendoo_Faq::questions</aclResource>
+        <aclResource>Magendoo_Faq::question</aclResource>
         <dataProvider class="Magendoo\Faq\Ui\DataProvider\QuestionDataProvider" name="faq_question_listing_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>

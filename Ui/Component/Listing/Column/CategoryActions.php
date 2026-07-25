@@ -76,6 +76,7 @@ class CategoryActions extends Column
                             'title' => __('Delete Category'),
                             'message' => __('Are you sure you want to delete this category?'),
                         ],
+                        'post' => true,
                     ];
                 }
             }

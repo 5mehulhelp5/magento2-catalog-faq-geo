@@ -27,10 +27,14 @@ class DeleteButton extends GenericButton implements ButtonProviderInterface
         $data = [];
         $categoryId = $this->getCategoryId();
         if ($categoryId) {
+            $confirmMessage = $this->context->getEscaper()->escapeJs(
+                $this->context->getEscaper()->escapeHtml(__('Are you sure you want to delete this category?'))
+            );
             $data = [
                 'label' => __('Delete'),
                 'class' => 'delete',
-                'on_click' => 'deleteConfirm(\'' . __('Are you sure you want to delete this category?') . '\', \'' . $this->getDeleteUrl() . '\')',
+                'on_click' => 'deleteConfirm(\'' . $confirmMessage . '\', \''
+                    . $this->getDeleteUrl() . '\', {"data": {}})',
                 'sort_order' => 20,
             ];
         }
