@@ -295,6 +295,28 @@
             </settings>
         </field>
     </fieldset>
+    <!-- Customer Groups Fieldset -->
+    <fieldset name="customer_groups">
+        <settings>
+            <label translate="true">Customer Groups</label>
+            <collapsible>true</collapsible>
+            <opened>false</opened>
+        </settings>
+        <field name="customer_group_ids" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Magento\Customer\Ui\Component\Listing\Column\Group\Options</item>
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">question</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>int</dataType>
+                <label translate="true">Customer Groups</label>
+                <dataScope>customer_group_ids</dataScope>
+                <notice translate="true">Restrict this question to the selected customer groups. Leave empty to show it to all customers.</notice>
+            </settings>
+        </field>
+    </fieldset>
     <!-- Assign to FAQ Categories -->
     <fieldset name="faq_categories">
         <settings>
@@ -335,6 +357,28 @@
                 <label translate="true">Product IDs (comma-separated)</label>
                 <dataScope>product_ids</dataScope>
                 <notice translate="true">Enter one or more product entity IDs separated by commas. Example: 1,24,57. The question will appear on the "Product Questions" tab on each listed product's page.</notice>
+            </settings>
+        </field>
+    </fieldset>
+    <!-- Tags Fieldset -->
+    <fieldset name="tags">
+        <settings>
+            <label translate="true">Tags</label>
+            <collapsible>true</collapsible>
+            <opened>true</opened>
+        </settings>
+        <field name="tag_ids" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Magendoo\Faq\Model\Source\TagOptions</item>
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">question</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>int</dataType>
+                <label translate="true">Tags</label>
+                <dataScope>tag_ids</dataScope>
+                <notice translate="true">Cross-reference this question on the selected tag pages and in the tag cloud.</notice>
             </settings>
         </field>
     </fieldset>

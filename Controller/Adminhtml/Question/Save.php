@@ -117,6 +117,7 @@ class Save extends Action implements HttpPostActionInterface
 
         try {
             if ($questionId) {
+                /** @var \Magendoo\Faq\Model\Question $question */
                 $question = $this->questionRepository->getById($questionId);
             } else {
                 $question = $this->questionFactory->create();
@@ -169,10 +170,34 @@ class Save extends Action implements HttpPostActionInterface
                 $question->setData('product_ids', array_map('intval', $productIds));
             }
 
-            // Handle tags
-            if (isset($data['tags'])) {
-                $question->setData('tags', $data['tags']);
-            }
+            // Handle tag assignments (multiselect => array of strings). An
+            // absent key means the merchant cleared the selection, matching
+            // the checkbox convention above. The value is set under both keys
+            // the save pipeline reads: the resource model persists 'tag_ids'
+            // and the repository relation pass-through carries 'tags' (see
+            // \Magendoo\Faq\Model\QuestionRepository::save()).
+            $tagIds = array_map(
+                'intval',
+                array_filter(
+                    (array) ($data['tag_ids'] ?? []),
+                    static fn ($tagId) => $tagId !== '' && $tagId !== null
+                )
+            );
+            $question->setData('tag_ids', $tagIds);
+            $question->setData('tags', $tagIds);
+
+            // Handle customer group restrictions (multiselect => array of
+            // strings). An empty selection means "visible to all groups"; the
+            // filter must not drop group 0 (NOT LOGGED IN), which is a valid
+            // selectable group.
+            $customerGroupIds = array_map(
+                'intval',
+                array_filter(
+                    (array) ($data['customer_group_ids'] ?? []),
+                    static fn ($groupId) => $groupId !== '' && $groupId !== null
+                )
+            );
+            $question->setData('customer_group_ids', $customerGroupIds);
 
             if (isset($data['customer_id'])) {
                 $question->setCustomerId($data['customer_id'] ? (int) $data['customer_id'] : null);

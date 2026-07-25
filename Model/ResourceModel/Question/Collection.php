@@ -23,6 +23,11 @@ use Magendoo\Faq\Model\ResourceModel\Question as ResourceQuestion;
 class Collection extends AbstractCollection
 {
     /**
+     * Minimum token length indexed by the FULLTEXT index (innodb_ft_min_token_size default).
+     */
+    private const FULLTEXT_MIN_TOKEN_LENGTH = 3;
+
+    /**
      * @var string
      */
     protected $_idFieldName = 'question_id';
@@ -125,19 +130,59 @@ class Collection extends AbstractCollection
     /**
      * Add search filter (searches in title, short_answer, full_answer)
      *
+     * Uses the MAGENDOO_FAQ_QUESTION_FULLTEXT index via MATCH ... AGAINST in
+     * boolean mode with prefix wildcards, so "ship" still matches "shipping"
+     * as the previous LIKE scan did but without a full table scan. Tokens
+     * shorter than innodb_ft_min_token_size are not in the index, so queries
+     * without any indexable token fall back to the LIKE scan.
+     *
      * @param string $queryText
      * @return $this
      */
     public function addSearchFilter(string $queryText): static
     {
+        $fulltextQuery = $this->buildFulltextQuery($queryText);
+
+        if ($fulltextQuery !== '') {
+            $this->getSelect()->where(
+                'MATCH(main_table.title, main_table.short_answer, main_table.full_answer)'
+                . ' AGAINST (? IN BOOLEAN MODE)',
+                $fulltextQuery
+            );
+
+            return $this;
+        }
+
+        $like = $this->getConnection()->quote('%' . $queryText . '%');
         $this->getSelect()->where(
-            'main_table.title LIKE ? OR main_table.short_answer LIKE ? OR main_table.full_answer LIKE ?',
-            '%' . $queryText . '%',
-            '%' . $queryText . '%',
-            '%' . $queryText . '%'
+            "main_table.title LIKE {$like}"
+            . " OR main_table.short_answer LIKE {$like}"
+            . " OR main_table.full_answer LIKE {$like}"
         );
 
         return $this;
+    }
+
+    /**
+     * Build a boolean-mode fulltext expression: every indexable token is
+     * required, with a trailing wildcard for prefix matching. Boolean-mode
+     * operators are stripped so user input cannot alter the expression.
+     *
+     * @param string $queryText
+     * @return string Empty string when no token is indexable.
+     */
+    private function buildFulltextQuery(string $queryText): string
+    {
+        $tokens = preg_split('/[\s,;]+/u', trim($queryText), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $required = [];
+        foreach ($tokens as $token) {
+            $token = (string) preg_replace('/[+\-<>()~*"@]+/', '', $token);
+            if ($token !== '' && mb_strlen($token) >= self::FULLTEXT_MIN_TOKEN_LENGTH) {
+                $required[] = '+' . $token . '*';
+            }
+        }
+
+        return implode(' ', $required);
     }
 
     /**
@@ -170,8 +215,10 @@ class Collection extends AbstractCollection
     public function addCustomerGroupVisibilityFilter(int $groupId): static
     {
         $junction = $this->getTable('magendoo_faq_question_customer_group');
-        $noRestriction = "NOT EXISTS (SELECT 1 FROM {$junction} qcg WHERE qcg.question_id = main_table.question_id)";
-        $matchesGroup = "EXISTS (SELECT 1 FROM {$junction} qcg WHERE qcg.question_id = main_table.question_id AND qcg.customer_group_id = " . (int) $groupId . ')';
+        $noRestriction =
+            "NOT EXISTS (SELECT 1 FROM {$junction} qcg WHERE qcg.question_id = main_table.question_id)";
+        $matchesGroup = "EXISTS (SELECT 1 FROM {$junction} qcg WHERE qcg.question_id = main_table.question_id"
+            . ' AND qcg.customer_group_id = ' . (int) $groupId . ')';
         $this->getSelect()->where("({$noRestriction}) OR ({$matchesGroup})");
 
         return $this;

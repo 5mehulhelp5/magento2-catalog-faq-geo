@@ -16,5 +16,9 @@
         <referenceContainer name="content">
             <block class="Magendoo\Faq\Block\Faq\Tag\View" name="faq.tag.view" template="Magendoo_Faq::tag/view.phtml"/>
         </referenceContainer>
+        <referenceContainer name="head.additional">
+            <block class="Magendoo\Faq\Block\Faq\Canonical" name="faq.tag.canonical"
+                   ifconfig="magendoo_faq/seo/use_canonical"/>
+        </referenceContainer>
     </body>
 </page>

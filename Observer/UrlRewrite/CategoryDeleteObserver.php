@@ -1,6 +1,6 @@
 <?php
 /**
- * Magendoo Faq Category URL Rewrite Observer
+ * Magendoo Faq Category URL Rewrite Delete Observer
  *
  * @category  Magendoo
  * @package   Magendoo_Faq
@@ -18,9 +18,14 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
 /**
- * Regenerate URL rewrites when a FAQ category is saved
+ * Remove URL rewrites when a FAQ category is deleted
+ *
+ * Without this, deleting a category (admin delete/mass delete, REST DELETE — all go
+ * through the resource model, which dispatches magendoo_faq_category_delete_after)
+ * leaves the rewrite behind: a permanent soft-404 that also keeps the unique
+ * request_path + store_id slot occupied, so the url_key can never be reused.
  */
-class CategorySaveObserver implements ObserverInterface
+class CategoryDeleteObserver implements ObserverInterface
 {
     /**
      * @var FaqUrlRewriteGenerator
@@ -51,17 +56,10 @@ class CategorySaveObserver implements ObserverInterface
         }
 
         if ($category instanceof CategoryInterface && $category->getCategoryId()) {
-            // A disabled category 404s on the frontend, so keeping (or creating) its
-            // rewrite would only produce soft-404s and block the url_key for reuse.
-            if ((int) $category->getStatus() !== CategoryInterface::STATUS_ENABLED) {
-                $this->urlRewriteGenerator->deleteForEntity(
-                    FaqUrlRewriteGenerator::ENTITY_TYPE_CATEGORY,
-                    (int) $category->getCategoryId()
-                );
-                return;
-            }
-
-            $this->urlRewriteGenerator->generateForCategory($category);
+            $this->urlRewriteGenerator->deleteForEntity(
+                FaqUrlRewriteGenerator::ENTITY_TYPE_CATEGORY,
+                (int) $category->getCategoryId()
+            );
         }
     }
 }

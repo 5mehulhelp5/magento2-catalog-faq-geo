@@ -30,6 +30,8 @@
             <block class="Magendoo\Faq\Block\Faq\Hreflang" name="faq.home.hreflang"
                    template="Magendoo_Faq::hreflang.phtml"
                    ifconfig="magendoo_faq/seo/hreflang_enabled"/>
+            <block class="Magendoo\Faq\Block\Faq\Canonical" name="faq.home.canonical"
+                   ifconfig="magendoo_faq/seo/use_canonical"/>
         </referenceContainer>
     </body>
 </page>
