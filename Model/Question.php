@@ -270,6 +270,38 @@ class Question extends AbstractExtensibleModel implements QuestionInterface, Ide
     /**
      * @inheritdoc
      */
+    public function getConsentGivenAt(): ?string
+    {
+        return $this->getData(self::CONSENT_GIVEN_AT);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setConsentGivenAt(?string $consentGivenAt): static
+    {
+        return $this->setData(self::CONSENT_GIVEN_AT, $consentGivenAt);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getConsentText(): ?string
+    {
+        return $this->getData(self::CONSENT_TEXT);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setConsentText(?string $consentText): static
+    {
+        return $this->setData(self::CONSENT_TEXT, $consentText);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getPositiveRating(): int
     {
         return (int) $this->getData(self::POSITIVE_RATING);

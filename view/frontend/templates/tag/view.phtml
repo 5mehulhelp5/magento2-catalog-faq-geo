@@ -19,14 +19,14 @@
             <?php foreach ($questions as $question): ?>
             <div class="faq-question-item">
                 <h3 class="faq-question-title">
-                    <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>">
-                        <?= $block->escapeHtml($question->getTitle()) ?>
+                    <a href="<?= $escaper->escapeUrl($block->getQuestionUrl($question)) ?>">
+                        <?= $escaper->escapeHtml($question->getTitle()) ?>
                     </a>
                 </h3>
             </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <p><?= $block->escapeHtml(__('No questions with this tag.')) ?></p>
+            <p><?= $escaper->escapeHtml(__('No questions with this tag.')) ?></p>
         <?php endif; ?>
     </div>
 </div>

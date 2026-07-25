@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Magendoo\Faq\Model\ResourceModel;
 
+use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
@@ -130,14 +131,26 @@ class Question extends AbstractDb
     /**
      * Get question ID by URL key and store ID
      *
+     * Only answered questions with a storefront-visible visibility resolve:
+     * "public" always, "logged_in" only when the caller is an authenticated
+     * customer, "none" never. The login state travels as a parameter (safe
+     * default: anonymous) because a resource model must not depend on
+     * session state — every caller resolves it in its own context.
+     *
      * @param string $urlKey
      * @param int $storeId
+     * @param bool $isLoggedIn Whether the caller is an authenticated customer
      * @return int|false
      * @throws LocalizedException
      */
-    public function getByUrlKey(string $urlKey, int $storeId): int|false
+    public function getByUrlKey(string $urlKey, int $storeId, bool $isLoggedIn = false): int|false
     {
         $connection = $this->getConnection();
+
+        $visibilities = [QuestionInterface::VISIBILITY_PUBLIC];
+        if ($isLoggedIn) {
+            $visibilities[] = QuestionInterface::VISIBILITY_LOGGED_IN;
+        }
 
         // LEFT JOIN so a question with no store relation (e.g. created via API
         // without explicit store_ids) is still findable.
@@ -149,7 +162,8 @@ class Question extends AbstractDb
                 []
             )
             ->where('main.url_key = ?', $urlKey)
-            ->where('main.status = ?', 'answered')
+            ->where('main.status = ?', QuestionInterface::STATUS_ANSWERED)
+            ->where('main.visibility IN (?)', $visibilities)
             ->where('store.store_id IS NULL OR store.store_id IN (?)', [0, $storeId])
             ->limit(1);
 

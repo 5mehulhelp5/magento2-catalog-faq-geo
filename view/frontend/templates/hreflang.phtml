@@ -12,5 +12,5 @@
 ?>
 <?php $links = $block->getHreflangLinks(); ?>
 <?php foreach ($links as $link): ?>
-<link rel="alternate" hreflang="<?= $block->escapeHtmlAttr($link['hreflang']) ?>" href="<?= $block->escapeUrl($link['href']) ?>"/>
+<link rel="alternate" hreflang="<?= $escaper->escapeHtmlAttr($link['hreflang']) ?>" href="<?= $escaper->escapeUrl($link['href']) ?>"/>
 <?php endforeach; ?>

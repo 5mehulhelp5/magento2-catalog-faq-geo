@@ -18,16 +18,16 @@
         <div class="faq-results-list">
             <?php foreach ($results as $question): ?>
             <div class="faq-result-item">
-                <h3><a href="<?= $block->escapeUrl($block->getUrl('faq/question/view', ['id' => $question->getQuestionId()])) ?>">
-                    <?= $block->escapeHtml($question->getTitle()) ?>
+                <h3><a href="<?= $escaper->escapeUrl($block->getUrl('faq/question/view', ['id' => $question->getQuestionId()])) ?>">
+                    <?= $escaper->escapeHtml($question->getTitle()) ?>
                 </a></h3>
                 <?php if ($question->getShortAnswer()): ?>
-                <p><?= $block->escapeHtml($question->getShortAnswer()) ?></p>
+                <p><?= $escaper->escapeHtml($question->getShortAnswer()) ?></p>
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
     <?php else: ?>
-        <p class="faq-no-results"><?= $block->escapeHtml($block->getNoResultsText()) ?></p>
+        <p class="faq-no-results"><?= $escaper->escapeHtml($block->getNoResultsText()) ?></p>
     <?php endif; ?>
 </div>

@@ -17,21 +17,21 @@
 <div class="faq-rating faq-rating--average"
      data-question-id="<?= (int) $question->getQuestionId() ?>"
      data-mage-init='{"faqRating": {}}'>
-    <div class="rating-stars" data-rating="<?= $block->escapeHtmlAttr(number_format($avg, 2, '.', '')) ?>">
+    <div class="rating-stars" data-rating="<?= $escaper->escapeHtmlAttr(number_format($avg, 2, '.', '')) ?>">
         <?php for ($i = 1; $i <= 5; $i++): ?>
             <span class="star <?= $i <= (int) round($avg) ? 'filled' : 'empty' ?>" aria-hidden="true">&#9733;</span>
         <?php endfor; ?>
     </div>
     <span class="rating-value">
-        <?= $block->escapeHtml(number_format($avg, 1)) ?> <?= $block->escapeHtml(__('/ 5')) ?>
+        <?= $escaper->escapeHtml(number_format($avg, 1)) ?> <?= $escaper->escapeHtml(__('/ 5')) ?>
     </span>
-    <div class="rating-input" role="radiogroup" aria-label="<?= $block->escapeHtmlAttr(__('Rate this answer')) ?>">
-        <span class="rating-label"><?= $block->escapeHtml(__('Rate this answer:')) ?></span>
+    <div class="rating-input" role="radiogroup" aria-label="<?= $escaper->escapeHtmlAttr(__('Rate this answer')) ?>">
+        <span class="rating-label"><?= $escaper->escapeHtml(__('Rate this answer:')) ?></span>
         <?php for ($i = 1; $i <= 5; $i++): ?>
             <button type="button" class="action faq-star" data-vote="<?= (int) $i ?>"
-                    data-url="<?= $block->escapeUrl($block->getRateUrl()) ?>"
-                    title="<?= $block->escapeHtmlAttr(__('Rate %1 out of 5', $i)) ?>"
-                    aria-label="<?= $block->escapeHtmlAttr(__('Rate %1 out of 5', $i)) ?>">&#9734;</button>
+                    data-url="<?= $escaper->escapeUrl($block->getRateUrl()) ?>"
+                    title="<?= $escaper->escapeHtmlAttr(__('Rate %1 out of 5', $i)) ?>"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Rate %1 out of 5', $i)) ?>">&#9734;</button>
         <?php endfor; ?>
     </div>
 </div>

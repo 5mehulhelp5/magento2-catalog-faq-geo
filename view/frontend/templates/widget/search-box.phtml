@@ -14,15 +14,15 @@ declare(strict_types=1);
 ?>
 <div class="faq-widget faq-widget-search">
     <?php if ($block->getBlockTitle()): ?>
-    <h3 class="faq-widget-title"><?= $block->escapeHtml($block->getBlockTitle()) ?></h3>
+    <h3 class="faq-widget-title"><?= $escaper->escapeHtml($block->getBlockTitle()) ?></h3>
     <?php endif; ?>
-    <form action="<?= $block->escapeUrl($block->getSearchUrl()) ?>" method="get" class="faq-search-form">
+    <form action="<?= $escaper->escapeUrl($block->getSearchUrl()) ?>" method="get" class="faq-search-form">
         <div class="field search">
             <input type="text" name="q" class="input-text"
-                   placeholder="<?= $block->escapeHtmlAttr($block->getPlaceholder()) ?>"
+                   placeholder="<?= $escaper->escapeHtmlAttr($block->getPlaceholder()) ?>"
                    autocomplete="off"/>
             <button type="submit" class="action search">
-                <span><?= $block->escapeHtml(__('Search')) ?></span>
+                <span><?= $escaper->escapeHtml(__('Search')) ?></span>
             </button>
         </div>
     </form>

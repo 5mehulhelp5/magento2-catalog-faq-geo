@@ -18,7 +18,7 @@
             to avoid a duplicate heading. */ ?>
 
     <?php if ($category->getDescription()): ?>
-    <div class="faq-category-description"><?= $block->escapeHtml($category->getDescription()) ?></div>
+    <div class="faq-category-description"><?= $escaper->escapeHtml($category->getDescription()) ?></div>
     <?php endif; ?>
 
     <div class="faq-questions-list">
@@ -27,21 +27,21 @@
             <?php foreach ($questions as $question): ?>
             <div class="faq-question-item">
                 <h3 class="faq-question-title">
-                    <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>">
-                        <?= $block->escapeHtml($question->getTitle()) ?>
+                    <a href="<?= $escaper->escapeUrl($block->getQuestionUrl($question)) ?>">
+                        <?= $escaper->escapeHtml($question->getTitle()) ?>
                     </a>
                 </h3>
                 <div class="faq-answer-preview">
-                    <?= $block->escapeHtml($block->getAnswerPreview($question)) ?>
-                    <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>" class="read-more">
-                        <?= $block->escapeHtml(__('Read More')) ?>
+                    <?= $escaper->escapeHtml($block->getAnswerPreview($question)) ?>
+                    <a href="<?= $escaper->escapeUrl($block->getQuestionUrl($question)) ?>" class="read-more">
+                        <?= $escaper->escapeHtml(__('Read More')) ?>
                     </a>
                 </div>
             </div>
             <?php endforeach; ?>
             <?= $block->getPagerHtml() ?>
         <?php else: ?>
-            <p class="faq-no-questions"><?= $block->escapeHtml(__('No questions in this category yet.')) ?></p>
+            <p class="faq-no-questions"><?= $escaper->escapeHtml(__('No questions in this category yet.')) ?></p>
         <?php endif; ?>
     </div>
 </div>

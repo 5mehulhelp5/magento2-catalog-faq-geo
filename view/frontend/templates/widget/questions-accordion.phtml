@@ -17,17 +17,17 @@ declare(strict_types=1);
 <div class="faq-widget faq-widget-accordion"
      data-mage-init='{"accordion":{"openedState":"active","active":false}}'>
     <?php if ($block->getBlockTitle()): ?>
-    <h3 class="faq-widget-title"><?= $block->escapeHtml($block->getBlockTitle()) ?></h3>
+    <h3 class="faq-widget-title"><?= $escaper->escapeHtml($block->getBlockTitle()) ?></h3>
     <?php endif; ?>
     <?php foreach ($questions as $question): ?>
     <div class="faq-accordion-item" data-role="collapsible">
         <div class="faq-accordion-title" data-role="trigger">
-            <strong><?= $block->escapeHtml($question->getTitle()) ?></strong>
+            <strong><?= $escaper->escapeHtml($question->getTitle()) ?></strong>
         </div>
         <div class="faq-accordion-content" data-role="content">
-            <p><?= $block->escapeHtml($block->getAnswerPreview($question)) ?></p>
-            <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>"
-               class="read-more"><?= $block->escapeHtml(__('Read More')) ?></a>
+            <p><?= $escaper->escapeHtml($block->getAnswerPreview($question)) ?></p>
+            <a href="<?= $escaper->escapeUrl($block->getQuestionUrl($question)) ?>"
+               class="read-more"><?= $escaper->escapeHtml(__('Read More')) ?></a>
         </div>
     </div>
     <?php endforeach; ?>

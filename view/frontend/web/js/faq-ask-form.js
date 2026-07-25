@@ -40,12 +40,21 @@ define([
          * @returns {jQuery}
          */
         function getNotice() {
+            var parts;
+
             if ($notice === null) {
                 $notice = $('<div class="faq-ask-login-required"></div>').hide().insertBefore($wrapper);
+
+                // One phrase with a placeholder rather than three fragments concatenated:
+                // languages put the link in a different position within the sentence, so
+                // splitting it makes a correct translation impossible. Split on the
+                // placeholder and build text nodes so nothing is injected as markup.
+                parts = $t('Please %1 to ask a question.').split('%1');
+
                 $('<p></p>')
-                    .append(document.createTextNode($t('Please') + ' '))
+                    .append(document.createTextNode(parts[0]))
                     .append($('<a></a>').attr('href', config.loginUrl).text($t('log in')))
-                    .append(document.createTextNode(' ' + $t('to ask a question.')))
+                    .append(document.createTextNode(parts.length > 1 ? parts[1] : ''))
                     .appendTo($notice);
             }
 

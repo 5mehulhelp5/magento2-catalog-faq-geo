@@ -10,18 +10,11 @@
 
 /** @var \Magendoo\Faq\Block\Faq\Question\AskForm $block */
 ?>
-<?php if (!$block->canShowForm()): ?>
-    <div class="faq-ask-login-required">
-        <p><?= $block->escapeHtml(__('Please')) ?>
-           <a href="<?= $block->escapeUrl($block->getLoginUrl()) ?>"><?= $block->escapeHtml(__('log in')) ?></a>
-           <?= $block->escapeHtml(__('to ask a question.')) ?></p>
-    </div>
-<?php else: ?>
 <div class="faq-ask-form-wrapper">
-    <h3 class="faq-ask-form-title"><?= $block->escapeHtml(__('Ask a Question')) ?></h3>
-    <form action="<?= $block->escapeUrl($block->getSubmitUrl()) ?>"
+    <h3 class="faq-ask-form-title"><?= $escaper->escapeHtml(__('Ask a Question')) ?></h3>
+    <form action="<?= $escaper->escapeUrl($block->getSubmitUrl()) ?>"
           method="post" id="faq-ask-form" class="form faq-ask-form"
-          data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>">
+          data-hasrequired="<?= $escaper->escapeHtmlAttr(__('* Required Fields')) ?>">
         <?= $block->getBlockHtml('formkey') ?>
         <?php if ($block->getCurrentProductId()): ?>
             <input type="hidden" name="product_id" value="<?= (int)$block->getCurrentProductId() ?>"/>
@@ -29,27 +22,27 @@
         <fieldset class="fieldset">
             <div class="field required">
                 <label class="label" for="faq-ask-name">
-                    <span><?= $block->escapeHtml(__('Your Name')) ?></span>
+                    <span><?= $escaper->escapeHtml(__('Your Name')) ?></span>
                 </label>
                 <div class="control">
                     <input type="text" id="faq-ask-name" name="sender_name"
                            class="input-text" required
-                           value="<?= $block->escapeHtmlAttr($block->getLoggedInCustomerName()) ?>"/>
+                           value="<?= $escaper->escapeHtmlAttr($block->getLoggedInCustomerName()) ?>"/>
                 </div>
             </div>
             <div class="field required">
                 <label class="label" for="faq-ask-email">
-                    <span><?= $block->escapeHtml(__('Email')) ?></span>
+                    <span><?= $escaper->escapeHtml(__('Email')) ?></span>
                 </label>
                 <div class="control">
                     <input type="email" id="faq-ask-email" name="sender_email"
                            class="input-text" required
-                           value="<?= $block->escapeHtmlAttr($block->getLoggedInCustomerEmail()) ?>"/>
+                           value="<?= $escaper->escapeHtmlAttr($block->getLoggedInCustomerEmail()) ?>"/>
                 </div>
             </div>
             <div class="field required">
                 <label class="label" for="faq-ask-title">
-                    <span><?= $block->escapeHtml(__('Your Question')) ?></span>
+                    <span><?= $escaper->escapeHtml(__('Your Question')) ?></span>
                 </label>
                 <div class="control">
                     <textarea id="faq-ask-title" name="title"
@@ -62,7 +55,7 @@
                     <input type="checkbox" id="faq-gdpr" name="gdpr_consent" value="1" required
                            class="checkbox"/>
                     <label class="label" for="faq-gdpr">
-                        <span><?= /* @noEscape */ $block->getGdprText() ?></span>
+                        <span><?= $escaper->escapeHtml($block->getGdprText(), ['a', 'strong', 'em', 'br']) ?></span>
                     </label>
                 </div>
             </div>
@@ -71,11 +64,10 @@
         <?= $block->getChildHtml('form_additional_info') ?>
         <div class="actions-toolbar">
             <div class="primary">
-                <button type="submit" class="action submit primary" title="<?= $block->escapeHtmlAttr(__('Submit Question')) ?>">
-                    <span><?= $block->escapeHtml(__('Submit Question')) ?></span>
+                <button type="submit" class="action submit primary" title="<?= $escaper->escapeHtmlAttr(__('Submit Question')) ?>">
+                    <span><?= $escaper->escapeHtml(__('Submit Question')) ?></span>
                 </button>
             </div>
         </div>
     </form>
 </div>
-<?php endif; ?>

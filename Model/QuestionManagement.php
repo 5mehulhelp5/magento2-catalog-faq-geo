@@ -230,6 +230,19 @@ class QuestionManagement implements QuestionManagementInterface
             );
         }
 
+        // Record the consent so it can be produced later: WHEN it was given
+        // (UTC, the same gmtDate() source as the entity timestamps) and a
+        // snapshot of the wording that was shown — the configured text is
+        // mutable, so a record pointing at live config proves nothing. Both
+        // fields are server-owned; whatever the caller sent is discarded.
+        if ($this->faqHelper->isGdprEnabled() && $gdprConsent) {
+            $question->setConsentGivenAt($this->dateTime->gmtDate());
+            $question->setConsentText($this->faqHelper->getGdprText());
+        } else {
+            $question->setConsentGivenAt(null);
+            $question->setConsentText(null);
+        }
+
         $question->setTitle($title);
         $question->setSenderName($senderName);
         $question->setSenderEmail($senderEmail);
@@ -441,21 +454,40 @@ class QuestionManagement implements QuestionManagementInterface
      */
     public function getQuestionByUrlKey(string $urlKey, int $storeId): PublicQuestionInterface
     {
-        $question = $this->questionRepository->getByUrlKey($urlKey, $storeId);
-
-        // The resource-level lookup (ResourceModel\Question::getByUrlKey) filters
-        // on status only, so the visibility predicate has to be enforced here:
-        // a question retracted to visibility "none" must not stay retrievable
-        // through the anonymous url-key route.
-        $visibility = $question->getVisibility();
         $isLoggedInCustomer = $this->userContext->getUserType() === UserContextInterface::USER_TYPE_CUSTOMER
             && $this->userContext->getUserId();
 
+        // The resource lookup enforces the status + visibility predicate itself
+        // (a question retracted to visibility "none" never resolves; "logged_in"
+        // resolves only for an authenticated customer), so the login state is
+        // resolved here and passed down rather than re-filtered afterwards.
+        $questionId = $this->resourceQuestion->getByUrlKey($urlKey, $storeId, (bool) $isLoggedInCustomer);
+        if (!$questionId) {
+            throw new NoSuchEntityException(
+                __('FAQ question with URL key "%1" does not exist in store "%2".', $urlKey, $storeId)
+            );
+        }
+
+        // Group-restricted questions are hidden from every listing, so the
+        // direct url-key lookup must apply the same predicate. Same message as
+        // a miss so a hidden question is indistinguishable from a missing one.
+        $allowedGroupIds = $this->resourceQuestion->lookupCustomerGroupIds($questionId);
+        if ($allowedGroupIds !== []
+            && !in_array($this->resolveCustomerGroupId(), $allowedGroupIds, true)
+        ) {
+            throw new NoSuchEntityException(
+                __('FAQ question with URL key "%1" does not exist in store "%2".', $urlKey, $storeId)
+            );
+        }
+
+        $question = $this->questionRepository->getById($questionId);
+
+        // Defence in depth: keep the service-layer visibility gate in front of
+        // the loaded entity even though the resource lookup already filtered.
+        $visibility = $question->getVisibility();
         if ($visibility !== QuestionInterface::VISIBILITY_PUBLIC
             && !($visibility === QuestionInterface::VISIBILITY_LOGGED_IN && $isLoggedInCustomer)
         ) {
-            // Same message as the repository lookup so a hidden question is
-            // indistinguishable from a missing one.
             throw new NoSuchEntityException(
                 __('FAQ question with URL key "%1" does not exist in store "%2".', $urlKey, $storeId)
             );

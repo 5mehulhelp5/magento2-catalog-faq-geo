@@ -48,6 +48,8 @@ interface QuestionInterface extends PublicQuestionInterface, ExtensibleDataInter
     public const SENDER_NAME = 'sender_name';
     public const SENDER_EMAIL = 'sender_email';
     public const CUSTOMER_ID = 'customer_id';
+    public const CONSENT_GIVEN_AT = 'consent_given_at';
+    public const CONSENT_TEXT = 'consent_text';
     public const POSITIVE_RATING = 'positive_rating';
     public const NEGATIVE_RATING = 'negative_rating';
     public const AVERAGE_RATING = 'average_rating';
@@ -192,6 +194,36 @@ interface QuestionInterface extends PublicQuestionInterface, ExtensibleDataInter
      * @return $this
      */
     public function setCustomerId(?int $customerId): static;
+
+    /**
+     * Get the UTC timestamp the GDPR consent was given, null when none was recorded
+     *
+     * @return string|null
+     */
+    public function getConsentGivenAt(): ?string;
+
+    /**
+     * Set the UTC timestamp the GDPR consent was given
+     *
+     * @param string|null $consentGivenAt
+     * @return $this
+     */
+    public function setConsentGivenAt(?string $consentGivenAt): static;
+
+    /**
+     * Get the snapshot of the consent wording shown at submission time
+     *
+     * @return string|null
+     */
+    public function getConsentText(): ?string;
+
+    /**
+     * Set the snapshot of the consent wording shown at submission time
+     *
+     * @param string|null $consentText
+     * @return $this
+     */
+    public function setConsentText(?string $consentText): static;
 
     /**
      * Set positive rating

@@ -15,15 +15,15 @@
 <div class="faq-rating faq-rating--yes-no"
      data-question-id="<?= (int) $question->getQuestionId() ?>"
      data-mage-init='{"faqRating": {}}'>
-    <span class="rating-label"><?= $block->escapeHtml(__('Was this helpful?')) ?></span>
+    <span class="rating-label"><?= $escaper->escapeHtml(__('Was this helpful?')) ?></span>
     <button type="button" class="action faq-rate faq-rate--yes" data-vote="positive"
-            data-url="<?= $block->escapeUrl($block->getRateUrl()) ?>">
-        <span><?= $block->escapeHtml(__('Yes')) ?></span>
+            data-url="<?= $escaper->escapeUrl($block->getRateUrl()) ?>">
+        <span><?= $escaper->escapeHtml(__('Yes')) ?></span>
         <span class="count">(<?= (int) $block->getPositiveCount() ?>)</span>
     </button>
     <button type="button" class="action faq-rate faq-rate--no" data-vote="negative"
-            data-url="<?= $block->escapeUrl($block->getRateUrl()) ?>">
-        <span><?= $block->escapeHtml(__('No')) ?></span>
+            data-url="<?= $escaper->escapeUrl($block->getRateUrl()) ?>">
+        <span><?= $escaper->escapeHtml(__('No')) ?></span>
         <span class="count">(<?= (int) $block->getNegativeCount() ?>)</span>
     </button>
 </div>

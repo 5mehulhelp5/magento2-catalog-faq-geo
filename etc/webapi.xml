@@ -84,11 +84,18 @@
         </resources>
     </route>
 
-    <!-- Question Operations -->
+    <!-- Question Operations.
+         Submit requires an authenticated customer: the storefront form is
+         reCAPTCHA-protected through a frontend predispatch observer, an event
+         REST never dispatches, so an anonymous REST route would let a bot
+         bypass the captcha entirely. Guests submit through the protected form.
+         Reopening this route to anonymous callers requires wiring the webapi
+         captcha framework (Magento\ReCaptchaWebapiApi endpoint validation)
+         first. -->
     <route url="/V1/faq/questions/submit" method="POST">
         <service class="Magendoo\Faq\Api\QuestionManagementInterface" method="submitQuestion"/>
         <resources>
-            <resource ref="anonymous"/>
+            <resource ref="self"/>
         </resources>
     </route>
 

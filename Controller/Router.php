@@ -13,11 +13,13 @@ declare(strict_types=1);
 namespace Magendoo\Faq\Controller;
 
 use Magento\Framework\App\ActionFactory;
+use Magento\Customer\Model\Context as CustomerContext;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\Response\HttpInterface as HttpResponseInterface;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\App\Http\Context as HttpContext;
 use Magento\Framework\App\RouterInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -88,6 +90,11 @@ class Router implements RouterInterface
     protected ScopeConfigInterface $scopeConfig;
 
     /**
+     * @var HttpContext
+     */
+    protected HttpContext $httpContext;
+
+    /**
      * @param ActionFactory $actionFactory
      * @param FaqHelper $faqHelper
      * @param CategoryResource $categoryResource
@@ -107,7 +114,8 @@ class Router implements RouterInterface
         StoreManagerInterface $storeManager,
         ResponseInterface $response,
         UrlInterface $url,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        HttpContext $httpContext
     ) {
         $this->actionFactory = $actionFactory;
         $this->faqHelper = $faqHelper;
@@ -118,6 +126,7 @@ class Router implements RouterInterface
         $this->response = $response;
         $this->url = $url;
         $this->scopeConfig = $scopeConfig;
+        $this->httpContext = $httpContext;
     }
 
     /**
@@ -232,7 +241,11 @@ class Router implements RouterInterface
             $categoryUrlKey = $segments[0];
             $questionUrlKey = $segments[1];
             $categoryId = $this->categoryResource->getByUrlKey($categoryUrlKey, $storeId);
-            $questionId = $this->questionResource->getByUrlKey($questionUrlKey, $storeId);
+            // Login state comes from the page-cache context rather than the customer session:
+            // a router runs before depersonalization and must stay cache-variant-safe. Without
+            // it, questions restricted to logged-in customers would 404 for everyone.
+            $isLoggedIn = (bool) $this->httpContext->getValue(CustomerContext::CONTEXT_AUTH);
+            $questionId = $this->questionResource->getByUrlKey($questionUrlKey, $storeId, $isLoggedIn);
             if ($categoryId && $questionId) {
                 // The question must actually belong to the category; without this check
                 // every category × question combination returns a 200 copy of the same

@@ -14,13 +14,13 @@
     <?php /* Page title rendered by default Magento page-title-wrapper block. */ ?>
 
     <?php if ($block->isSearchBoxEnabled()): ?>
-    <div class="faq-search" data-mage-init='{"faqAutocomplete": {"suggestUrl": "<?= $block->escapeUrl($block->getUrl('faq/question/suggest')) ?>"}}'>
-        <form action="<?= $block->escapeUrl($block->getSearchUrl()) ?>" method="get">
+    <div class="faq-search" data-mage-init='{"faqAutocomplete": {"suggestUrl": "<?= $escaper->escapeUrl($block->getUrl('faq/question/suggest')) ?>"}}'>
+        <form action="<?= $escaper->escapeUrl($block->getSearchUrl()) ?>" method="get">
             <div class="field search">
-                <input type="text" name="q" placeholder="<?= $block->escapeHtmlAttr(__('Search FAQ...')) ?>"
+                <input type="text" name="q" placeholder="<?= $escaper->escapeHtmlAttr(__('Search FAQ...')) ?>"
                        class="input-text" autocomplete="off"/>
-                <button type="submit" class="action search" title="<?= $block->escapeHtmlAttr(__('Search')) ?>">
-                    <span><?= $block->escapeHtml(__('Search')) ?></span>
+                <button type="submit" class="action search" title="<?= $escaper->escapeHtmlAttr(__('Search')) ?>">
+                    <span><?= $escaper->escapeHtml(__('Search')) ?></span>
                 </button>
             </div>
         </form>
@@ -33,22 +33,22 @@
             <div class="faq-category-list">
                 <?php foreach ($categories as $category): ?>
                 <div class="faq-category-item">
-                    <a href="<?= $block->escapeUrl($block->getCategoryUrl($category)) ?>" class="faq-category-link">
+                    <a href="<?= $escaper->escapeUrl($block->getCategoryUrl($category)) ?>" class="faq-category-link">
                         <?php $iconUrl = $block->getCategoryIconUrl($category); ?>
                         <?php if ($iconUrl): ?>
-                        <img src="<?= $block->escapeUrl($iconUrl) ?>"
-                             alt="<?= $block->escapeHtmlAttr($category->getName()) ?>" class="faq-category-icon"/>
+                        <img src="<?= $escaper->escapeUrl($iconUrl) ?>"
+                             alt="<?= $escaper->escapeHtmlAttr($category->getName()) ?>" class="faq-category-icon"/>
                         <?php endif; ?>
-                        <h2 class="faq-category-name"><?= $block->escapeHtml($category->getName()) ?></h2>
+                        <h2 class="faq-category-name"><?= $escaper->escapeHtml($category->getName()) ?></h2>
                         <?php if ($category->getDescription()): ?>
-                        <p class="faq-category-description"><?= $block->escapeHtml($category->getDescription()) ?></p>
+                        <p class="faq-category-description"><?= $escaper->escapeHtml($category->getDescription()) ?></p>
                         <?php endif; ?>
                     </a>
                 </div>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <p class="faq-no-categories"><?= $block->escapeHtml(__('No FAQ categories available.')) ?></p>
+            <p class="faq-no-categories"><?= $escaper->escapeHtml(__('No FAQ categories available.')) ?></p>
         <?php endif; ?>
     </div>
 </div>

@@ -17,16 +17,16 @@
             <?php foreach ($questions as $question): ?>
             <div class="faq-product-item">
                 <div class="faq-question-text">
-                    <strong><?= $block->escapeHtml($question->getTitle()) ?></strong>
+                    <strong><?= $escaper->escapeHtml($question->getTitle()) ?></strong>
                 </div>
                 <div class="faq-answer-text">
-                    <?= $block->escapeHtml($question->getShortAnswer() ?: mb_substr(strip_tags($question->getFullAnswer()), 0, 250)) ?>
+                    <?= $escaper->escapeHtml($question->getShortAnswer() ?: mb_substr(strip_tags($question->getFullAnswer()), 0, 250)) ?>
                 </div>
             </div>
             <?php endforeach; ?>
         </div>
     <?php else: ?>
-        <p><?= $block->escapeHtml(__('No questions yet for this product.')) ?></p>
+        <p><?= $escaper->escapeHtml(__('No questions yet for this product.')) ?></p>
     <?php endif; ?>
 
     <?= $block->getChildHtml('ask_form') ?>
