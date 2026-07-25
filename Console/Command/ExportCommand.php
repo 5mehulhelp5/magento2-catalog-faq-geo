@@ -27,7 +27,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Relation assignments (stores, categories, products, tags, customer groups)
  * are exported alongside the main-table columns so an export/import round
  * trip preserves them: id lists as comma-separated values, tags as a
- * comma-separated list of tag names (the format the repository accepts).
+ * comma-separated list of tag NAMES, because a tag id means nothing to a
+ * merchant editing the file. ImportCommand resolves those names back to ids
+ * and creates any tag that does not exist yet.
  *
  * Cell values starting with a spreadsheet formula trigger (=, +, -, @, tab,
  * CR) are prefixed with a single quote; ImportCommand strips it again.
