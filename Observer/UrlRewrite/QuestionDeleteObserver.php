@@ -1,6 +1,6 @@
 <?php
 /**
- * Magendoo Faq Question URL Rewrite Observer
+ * Magendoo Faq Question URL Rewrite Delete Observer
  *
  * @category  Magendoo
  * @package   Magendoo_Faq
@@ -18,9 +18,14 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
 /**
- * Regenerate URL rewrites when a FAQ question is saved
+ * Remove URL rewrites when a FAQ question is deleted
+ *
+ * Without this, deleting a question (admin delete/mass delete, REST DELETE — all go
+ * through the resource model, which dispatches magendoo_faq_question_delete_after)
+ * leaves the rewrite behind: a permanent soft-404 that also keeps the unique
+ * request_path + store_id slot occupied, so the url_key can never be reused.
  */
-class QuestionSaveObserver implements ObserverInterface
+class QuestionDeleteObserver implements ObserverInterface
 {
     /**
      * @var FaqUrlRewriteGenerator
@@ -51,19 +56,10 @@ class QuestionSaveObserver implements ObserverInterface
         }
 
         if ($question instanceof QuestionInterface && $question->getQuestionId()) {
-            // Only answered questions are visible on the frontend. Generating rewrites
-            // for pending/spam questions (e.g. guest submissions) creates soft-404s and
-            // lets an unmoderated title occupy a request_path slot; dropping the rewrite
-            // here also covers the answered -> pending/spam transition.
-            if ($question->getStatus() !== QuestionInterface::STATUS_ANSWERED) {
-                $this->urlRewriteGenerator->deleteForEntity(
-                    FaqUrlRewriteGenerator::ENTITY_TYPE_QUESTION,
-                    (int) $question->getQuestionId()
-                );
-                return;
-            }
-
-            $this->urlRewriteGenerator->generateForQuestion($question);
+            $this->urlRewriteGenerator->deleteForEntity(
+                FaqUrlRewriteGenerator::ENTITY_TYPE_QUESTION,
+                (int) $question->getQuestionId()
+            );
         }
     }
 }

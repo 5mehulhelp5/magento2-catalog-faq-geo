@@ -25,6 +25,9 @@
                    name="faq.category.hreflang"
                    template="Magendoo_Faq::hreflang.phtml"
                    ifconfig="magendoo_faq/seo/hreflang_enabled"/>
+            <block class="Magendoo\Faq\Block\Faq\Canonical"
+                   name="faq.category.canonical"
+                   ifconfig="magendoo_faq/seo/use_canonical"/>
         </referenceContainer>
     </body>
 </page>

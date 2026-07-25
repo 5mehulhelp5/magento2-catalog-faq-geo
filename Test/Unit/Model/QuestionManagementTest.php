@@ -17,6 +17,7 @@ use Magendoo\Faq\Api\Data\QuestionSearchResultsInterfaceFactory;
 use Magendoo\Faq\Api\QuestionRepositoryInterface;
 use Magendoo\Faq\Model\Email\Sender as EmailSender;
 use Magento\Authorization\Model\UserContextInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\QuestionManagement;
 use Magendoo\Faq\Model\ResourceModel\Question as ResourceQuestion;
@@ -83,6 +84,11 @@ class QuestionManagementTest extends TestCase
     private DateTime|MockObject $dateTime;
 
     /**
+     * @var FaqHelper|MockObject
+     */
+    private FaqHelper|MockObject $faqHelper;
+
+    /**
      * @var QuestionManagement
      */
     private QuestionManagement $sut;
@@ -102,6 +108,8 @@ class QuestionManagementTest extends TestCase
         $this->customerSession = $this->createMock(CustomerSession::class);
         $this->remoteAddress = $this->createMock(RemoteAddress::class);
         $this->dateTime = $this->createMock(DateTime::class);
+        $this->faqHelper = $this->createMock(FaqHelper::class);
+        $this->faqHelper->method('isGuestRatingAllowed')->willReturn(true);
 
         $this->requestedTables = [];
         $this->resourceConnection->method('getConnection')->willReturn($this->connection);
@@ -133,9 +141,10 @@ class QuestionManagementTest extends TestCase
             $this->createStub(EmailSender::class),
             $this->customerSession,
             $this->remoteAddress,
-            $this->createStub(FaqHelper::class),
+            $this->faqHelper,
             $this->createStub(FilterManager::class),
-            $this->createStub(UserContextInterface::class)
+            $this->createStub(UserContextInterface::class),
+            $this->createStub(CustomerRepositoryInterface::class)
         );
     }
 
@@ -261,7 +270,7 @@ class QuestionManagementTest extends TestCase
             });
 
         $updates = [];
-        $this->connection->expects($this->exactly(2))
+        $this->connection->expects($this->once())
             ->method('update')
             ->willReturnCallback(function (string $table, array $bind, $where) use (&$updates): int {
                 $updates[] = [$table, $bind, $where];
@@ -292,9 +301,11 @@ class QuestionManagementTest extends TestCase
         );
         $this->assertSame(['question_id = ?' => 11], $counterWhere);
 
-        // Second update recalculates the average: 3 positive of 4 total = 75%.
-        [, $averageBind] = $updates[1];
-        $this->assertSame(['average_rating' => 75.0], $averageBind);
+        // A helpful / not-helpful vote only moves its counter. average_rating is no longer
+        // written here: it used to be recomputed as percent-positive and then rendered by the
+        // template as a score out of 5, so a single positive vote displayed "100.0 / 5".
+        // The column is now an average of the 1-5 star values and is written only by star votes.
+        $this->assertCount(1, $updates, 'a helpful/not-helpful vote must not touch average_rating');
     }
 
     /**

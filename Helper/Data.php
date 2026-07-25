@@ -38,6 +38,7 @@ class Data extends AbstractHelper
     private const XML_PATH_QUESTIONS_PER_CATEGORY_PAGE = 'magendoo_faq/navigation/questions_per_category_page';
     private const XML_PATH_QUESTIONS_PER_SEARCH_PAGE = 'magendoo_faq/navigation/questions_per_search_page';
     private const XML_PATH_NO_RESULTS_TEXT = 'magendoo_faq/navigation/no_results_text';
+    private const XML_PATH_TAGS_LIMIT = 'magendoo_faq/navigation/tags_limit';
 
     /** Product page config paths */
     private const XML_PATH_PRODUCT_ENABLED = 'magendoo_faq/product_page/enabled';
@@ -49,6 +50,10 @@ class Data extends AbstractHelper
     /** Rating config paths */
     private const XML_PATH_RATING_ENABLED = 'magendoo_faq/rating/enabled';
     private const XML_PATH_RATING_TYPE = 'magendoo_faq/rating/type';
+    private const XML_PATH_RATING_ALLOW_GUEST = 'magendoo_faq/rating/allow_guest_rating';
+
+    /** Admin notifications config paths */
+    private const XML_PATH_ADMIN_NOTIFICATIONS_ENABLED = 'magendoo_faq/admin_notifications/enabled';
 
     /** Social config paths */
     private const XML_PATH_SOCIAL_ENABLED = 'magendoo_faq/social/enabled';
@@ -288,6 +293,51 @@ class Data extends AbstractHelper
     {
         return (string) $this->scopeConfig->getValue(
             self::XML_PATH_RATING_TYPE,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Check whether guests (not-logged-in visitors) are allowed to rate questions.
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function isGuestRatingAllowed(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_RATING_ALLOW_GUEST,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Get the maximum number of tags shown in the tag cloud (0 = no limit).
+     *
+     * @param int|null $storeId
+     * @return int
+     */
+    public function getTagsLimit(?int $storeId = null): int
+    {
+        return (int) $this->scopeConfig->getValue(
+            self::XML_PATH_TAGS_LIMIT,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
+
+    /**
+     * Check whether admin notifications for new questions are enabled.
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function isAdminNotificationEnabled(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_ADMIN_NOTIFICATIONS_ENABLED,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );

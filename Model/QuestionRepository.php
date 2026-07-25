@@ -23,6 +23,7 @@ use Magento\Framework\Api\ExtensibleDataObjectConverter;
 use Magento\Framework\Api\ExtensionAttribute\JoinProcessorInterface;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -150,8 +151,13 @@ class QuestionRepository implements QuestionRepositoryInterface
 
         try {
             $this->resource->save($questionModel);
+        } catch (AlreadyExistsException $exception) {
+            // URL key collisions (rewrite generation runs inside the save transaction).
+            // Re-throw with the original actionable message so callers do not surface
+            // this as a generic "something went wrong" failure.
+            throw new CouldNotSaveException(__($exception->getMessage()), $exception);
         } catch (\Exception $exception) {
-            throw new CouldNotSaveException(__($exception->getMessage()));
+            throw new CouldNotSaveException(__($exception->getMessage()), $exception);
         }
 
         // Clear registry cache

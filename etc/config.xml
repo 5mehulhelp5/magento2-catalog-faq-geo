@@ -19,13 +19,8 @@
                 <url_prefix>faq</url_prefix>
                 <allow_guest_questions>1</allow_guest_questions>
             </general>
-            <home_page>
-                <use_cms_page>0</use_cms_page>
-                <layout>none</layout>
-            </home_page>
             <navigation>
                 <show_breadcrumbs>1</show_breadcrumbs>
-                <show_ask_button>1</show_ask_button>
                 <sort_categories_by>position</sort_categories_by>
                 <sort_questions_by>position</sort_questions_by>
                 <answer_length_limit>250</answer_length_limit>
@@ -33,6 +28,7 @@
                 <questions_per_category_page>10</questions_per_category_page>
                 <questions_per_search_page>10</questions_per_search_page>
                 <short_answer_behavior>short_answer</short_answer_behavior>
+                <tags_limit>20</tags_limit>
             </navigation>
             <product_page>
                 <enabled>1</enabled>

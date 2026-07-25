@@ -201,6 +201,28 @@
             </settings>
         </field>
     </fieldset>
+    <!-- Customer Groups Fieldset -->
+    <fieldset name="customer_groups">
+        <settings>
+            <label translate="true">Customer Groups</label>
+            <collapsible>true</collapsible>
+            <opened>false</opened>
+        </settings>
+        <field name="customer_group_ids" formElement="multiselect">
+            <argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">Magento\Customer\Ui\Component\Listing\Column\Group\Options</item>
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">category</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>int</dataType>
+                <label translate="true">Customer Groups</label>
+                <dataScope>customer_group_ids</dataScope>
+                <notice translate="true">Restrict this category to the selected customer groups. Leave empty to show it to all customers.</notice>
+            </settings>
+        </field>
+    </fieldset>
     <!-- SEO Fieldset -->
     <fieldset name="seo">
         <settings>

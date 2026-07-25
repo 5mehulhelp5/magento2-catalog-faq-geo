@@ -93,6 +93,7 @@ class Save extends Action implements HttpPostActionInterface
 
         try {
             if ($categoryId) {
+                /** @var \Magendoo\Faq\Model\Category $category */
                 $category = $this->categoryRepository->getById($categoryId);
             } else {
                 $category = $this->categoryFactory->create();
@@ -135,6 +136,19 @@ class Save extends Action implements HttpPostActionInterface
             if (isset($data['store_ids'])) {
                 $category->setData('store_ids', $data['store_ids']);
             }
+
+            // Handle customer group restrictions (multiselect => array of
+            // strings). An empty selection means "visible to all groups"; the
+            // filter must not drop group 0 (NOT LOGGED IN), which is a valid
+            // selectable group.
+            $customerGroupIds = array_map(
+                'intval',
+                array_filter(
+                    (array) ($data['customer_group_ids'] ?? []),
+                    static fn ($groupId) => $groupId !== '' && $groupId !== null
+                )
+            );
+            $category->setData('customer_group_ids', $customerGroupIds);
 
             $category = $this->categoryRepository->save($category);
 

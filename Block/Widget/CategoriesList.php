@@ -63,6 +63,11 @@ class CategoriesList extends Template implements BlockInterface, IdentityInterfa
     private ?Collection $categories = null;
 
     /**
+     * @var array<int, int>|null
+     */
+    private ?array $questionCounts = null;
+
+    /**
      * @param Context $context
      * @param CategoryCollectionFactory $categoryCollectionFactory
      * @param QuestionCollectionFactory $questionCollectionFactory
@@ -166,18 +171,65 @@ class CategoriesList extends Template implements BlockInterface, IdentityInterfa
      */
     public function getQuestionCount(CategoryInterface $category): int
     {
-        $collection = $this->questionCollectionFactory->create();
-        $collection->addActiveFilter();
-        $collection->addVisibilityFilter(QuestionInterface::VISIBILITY_PUBLIC);
-        $collection->addCategoryFilter((int) $category->getCategoryId());
+        $counts = $this->loadQuestionCounts();
 
-        $storeId = (int) $this->storeManager->getStore()->getId();
-        $collection->addStoreFilter($storeId);
-        $collection->addCustomerGroupVisibilityFilter(
-            (int) $this->customerSession->getCustomerGroupId()
-        );
+        return $counts[(int) $category->getCategoryId()] ?? 0;
+    }
 
-        return $collection->getSize();
+    /**
+     * Load per-category question counts in a single grouped query
+     *
+     * Mirrors the filters the per-category collection applied (answered,
+     * public, current store or no store restriction, current customer group
+     * or no group restriction) so the numbers match what a shopper can open.
+     *
+     * @return array<int, int>
+     */
+    private function loadQuestionCounts(): array
+    {
+        if ($this->questionCounts === null) {
+            $this->questionCounts = [];
+
+            $collection = $this->questionCollectionFactory->create();
+            $connection = $collection->getConnection();
+            $storeId = (int) $this->storeManager->getStore()->getId();
+            $groupId = (int) $this->customerSession->getCustomerGroupId();
+            $groupJunction = $collection->getTable('magendoo_faq_question_customer_group');
+            $noRestriction =
+                "NOT EXISTS (SELECT 1 FROM {$groupJunction} qcg WHERE qcg.question_id = q.question_id)";
+            $matchesGroup = "EXISTS (SELECT 1 FROM {$groupJunction} qcg WHERE qcg.question_id = q.question_id"
+                . ' AND qcg.customer_group_id = ' . $groupId . ')';
+
+            $select = $connection->select()
+                ->from(
+                    ['q_cat' => $collection->getTable('magendoo_faq_question_category')],
+                    [
+                        'category_id',
+                        'cnt' => new \Zend_Db_Expr('COUNT(DISTINCT q_cat.question_id)'),
+                    ]
+                )
+                ->join(
+                    ['q' => $collection->getTable('magendoo_faq_question')],
+                    'q_cat.question_id = q.question_id',
+                    []
+                )
+                ->joinLeft(
+                    ['q_store' => $collection->getTable('magendoo_faq_question_store')],
+                    'q.question_id = q_store.question_id',
+                    []
+                )
+                ->where('q.status = ?', QuestionInterface::STATUS_ANSWERED)
+                ->where('q.visibility = ?', QuestionInterface::VISIBILITY_PUBLIC)
+                ->where('q_store.store_id IS NULL OR q_store.store_id IN (?)', [0, $storeId])
+                ->where("({$noRestriction}) OR ({$matchesGroup})")
+                ->group('q_cat.category_id');
+
+            foreach ($connection->fetchAll($select) as $row) {
+                $this->questionCounts[(int) $row['category_id']] = (int) $row['cnt'];
+            }
+        }
+
+        return $this->questionCounts;
     }
 
     /**

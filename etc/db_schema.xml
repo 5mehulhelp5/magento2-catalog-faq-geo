@@ -33,11 +33,21 @@
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="category_id"/>
         </constraint>
-        <index referenceId="MAGENDOO_FAQ_CATEGORY_URL_KEY" indexType="btree">
+        <!-- Unique: getByUrlKey() resolves a url_key to a single category. Store
+             assignment lives in a mutable junction table, so per-store uniqueness
+             cannot be expressed as a table constraint; global uniqueness matches
+             the magendoo_faq_tag url_key design. -->
+        <constraint xsi:type="unique" referenceId="MAGENDOO_FAQ_CATEGORY_URL_KEY">
             <column name="url_key"/>
-        </index>
+        </constraint>
         <index referenceId="MAGENDOO_FAQ_CATEGORY_STATUS" indexType="btree">
             <column name="status"/>
+        </index>
+        <!-- Backs the admin grid keyword search (framework FulltextFilter is a
+             silent no-op when the main table has no FULLTEXT index). -->
+        <index referenceId="MAGENDOO_FAQ_CATEGORY_FULLTEXT" indexType="fulltext">
+            <column name="name"/>
+            <column name="description"/>
         </index>
     </table>
 
@@ -70,6 +80,12 @@
         <constraint xsi:type="foreign" referenceId="MAGENDOO_FAQ_CAT_CGRP_CAT_ID"
                     table="magendoo_faq_category_customer_group" column="category_id"
                     referenceTable="magendoo_faq_category" referenceColumn="category_id"
+                    onDelete="CASCADE"/>
+        <!-- CASCADE so deleting a customer group removes its restriction rows
+             instead of leaving the category invisible to everyone. -->
+        <constraint xsi:type="foreign" referenceId="MAGENDOO_FAQ_CAT_CGRP_CGRP_ID"
+                    table="magendoo_faq_category_customer_group" column="customer_group_id"
+                    referenceTable="customer_group" referenceColumn="customer_group_id"
                     onDelete="CASCADE"/>
     </table>
 
@@ -107,9 +123,13 @@
                     table="magendoo_faq_question" column="customer_id"
                     referenceTable="customer_entity" referenceColumn="entity_id"
                     onDelete="SET NULL"/>
-        <index referenceId="MAGENDOO_FAQ_QUESTION_URL_KEY" indexType="btree">
+        <!-- Unique: getByUrlKey() resolves a url_key to a single question. Store
+             assignment lives in a mutable junction table, so per-store uniqueness
+             cannot be expressed as a table constraint; global uniqueness matches
+             the magendoo_faq_tag url_key design. -->
+        <constraint xsi:type="unique" referenceId="MAGENDOO_FAQ_QUESTION_URL_KEY">
             <column name="url_key"/>
-        </index>
+        </constraint>
         <index referenceId="MAGENDOO_FAQ_QUESTION_STATUS" indexType="btree">
             <column name="status"/>
         </index>
@@ -198,6 +218,12 @@
                     table="magendoo_faq_question_customer_group" column="question_id"
                     referenceTable="magendoo_faq_question" referenceColumn="question_id"
                     onDelete="CASCADE"/>
+        <!-- CASCADE so deleting a customer group removes its restriction rows
+             instead of leaving the question invisible to everyone. -->
+        <constraint xsi:type="foreign" referenceId="MAGENDOO_FAQ_Q_CGRP_CGRP_ID"
+                    table="magendoo_faq_question_customer_group" column="customer_group_id"
+                    referenceTable="customer_group" referenceColumn="customer_group_id"
+                    onDelete="CASCADE"/>
     </table>
 
     <!-- FAQ Tags -->
@@ -275,11 +301,16 @@
                     table="magendoo_faq_search_log" column="store_id"
                     referenceTable="store" referenceColumn="store_id"
                     onDelete="CASCADE"/>
-        <index referenceId="MAGENDOO_FAQ_SEARCH_LOG_QUERY" indexType="btree">
-            <column name="query_text"/>
-        </index>
         <index referenceId="MAGENDOO_FAQ_SEARCH_LOG_STORE_ID" indexType="btree">
             <column name="store_id"/>
+        </index>
+        <!-- Fulltext (not btree): backs the admin grid keyword search, which is
+             a silent no-op when the main table has no FULLTEXT index. A btree
+             on the same column would generate the identical physical name and
+             the two declarations would silently collide; no code path reads
+             query_text by equality, so the btree is not declared. -->
+        <index referenceId="MAGENDOO_FAQ_SEARCH_LOG_FULLTEXT" indexType="fulltext">
+            <column name="query_text"/>
         </index>
     </table>
 </schema>

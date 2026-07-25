@@ -96,18 +96,29 @@ class QuestionDataProvider extends ModifierPoolDataProvider
             foreach ($this->collection->getItems() as $question) {
                 $data = $question->getData();
 
+                /** @var \Magendoo\Faq\Model\ResourceModel\Question $resource */
+                $resource = $question->getResource();
+
                 // Load store IDs from junction table
-                $storeIds = $question->getResource()->lookupStoreIds((int)$question->getId());
+                $storeIds = $resource->lookupStoreIds((int)$question->getId());
                 $data['store_ids'] = $storeIds;
 
                 // Load category IDs from junction table
-                $categoryIds = $question->getResource()->lookupCategoryIds((int)$question->getId());
+                $categoryIds = $resource->lookupCategoryIds((int)$question->getId());
                 $data['category_ids'] = $categoryIds;
 
                 // Load product IDs from junction table. The form uses a comma-
                 // separated text input, so flatten the int[] to a CSV string.
-                $productIds = $question->getResource()->lookupProductIds((int)$question->getId());
+                $productIds = $resource->lookupProductIds((int)$question->getId());
                 $data['product_ids'] = implode(',', $productIds);
+
+                // Load tag IDs from junction table
+                $tagIds = $resource->lookupTagIds((int)$question->getId());
+                $data['tag_ids'] = $tagIds;
+
+                // Load customer group IDs from junction table
+                $customerGroupIds = $resource->lookupCustomerGroupIds((int)$question->getId());
+                $data['customer_group_ids'] = $customerGroupIds;
 
                 $this->loadedData[$question->getId()] = $data;
             }

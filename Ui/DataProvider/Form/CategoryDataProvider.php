@@ -132,9 +132,16 @@ class CategoryDataProvider extends ModifierPoolDataProvider
             foreach ($this->collection->getItems() as $category) {
                 $data = $category->getData();
 
+                /** @var \Magendoo\Faq\Model\ResourceModel\Category $resource */
+                $resource = $category->getResource();
+
                 // Load store IDs from junction table
-                $storeIds = $category->getResource()->lookupStoreIds((int)$category->getId());
+                $storeIds = $resource->lookupStoreIds((int)$category->getId());
                 $data['store_ids'] = $storeIds;
+
+                // Load customer group IDs from junction table
+                $customerGroupIds = $resource->lookupCustomerGroupIds((int)$category->getId());
+                $data['customer_group_ids'] = $customerGroupIds;
 
                 $data = $this->convertIconData($data);
 

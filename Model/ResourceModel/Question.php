@@ -414,7 +414,13 @@ class Question extends AbstractDb
      */
     private function saveTagRelation(AbstractModel $object): void
     {
-        $tagIds = $object->getData('tag_ids');
+        // The repository save path transfers incoming tag assignments under
+        // the 'tags' key (see \Magendoo\Faq\Model\QuestionRepository::save()),
+        // while _afterLoad() hydrates 'tag_ids' from the junction table. An
+        // explicitly set 'tags' key must win, otherwise a repository save
+        // would silently re-persist the values loaded from the junction and
+        // the submitted assignment would never reach the table.
+        $tagIds = $object->hasData('tags') ? $object->getData('tags') : $object->getData('tag_ids');
         if ($tagIds === null) {
             return;
         }

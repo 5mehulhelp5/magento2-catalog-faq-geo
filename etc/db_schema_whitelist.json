@@ -20,10 +20,12 @@
         },
         "index": {
             "MAGENDOO_FAQ_CATEGORY_URL_KEY": true,
-            "MAGENDOO_FAQ_CATEGORY_STATUS": true
+            "MAGENDOO_FAQ_CATEGORY_STATUS": true,
+            "MAGENDOO_FAQ_CATEGORY_NAME_DESCRIPTION": true
         },
         "constraint": {
-            "PRIMARY": true
+            "PRIMARY": true,
+            "MAGENDOO_FAQ_CATEGORY_URL_KEY": true
         }
     },
     "magendoo_faq_category_store": {
@@ -44,7 +46,8 @@
         },
         "constraint": {
             "PRIMARY": true,
-            "MAGENDOO_FAQ_CTGR_CSTR_GROUP_CTGR_ID_MAGENDOO_FAQ_CTGR_CTGR_ID": true
+            "MAGENDOO_FAQ_CTGR_CSTR_GROUP_CTGR_ID_MAGENDOO_FAQ_CTGR_CTGR_ID": true,
+            "FK_4F7D731DFF47C862DE2BD9EC0E8572CC": true
         }
     },
     "magendoo_faq_question": {
@@ -84,7 +87,8 @@
         },
         "constraint": {
             "PRIMARY": true,
-            "MAGENDOO_FAQ_QUESTION_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true
+            "MAGENDOO_FAQ_QUESTION_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "MAGENDOO_FAQ_QUESTION_URL_KEY": true
         }
     },
     "magendoo_faq_question_store": {
@@ -133,7 +137,8 @@
         },
         "constraint": {
             "PRIMARY": true,
-            "FK_F50C19457D24FED423C731CDA5F48E8E": true
+            "FK_F50C19457D24FED423C731CDA5F48E8E": true,
+            "FK_633625B710C63C0A1AD97EA9F2D7B345": true
         }
     },
     "magendoo_faq_tag": {

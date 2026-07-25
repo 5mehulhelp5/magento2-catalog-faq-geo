@@ -27,7 +27,6 @@ class SearchLog extends AbstractModel
     public const QUERY_TEXT = 'query_text';
     public const STORE_ID = 'store_id';
     public const RESULTS_COUNT = 'results_count';
-    public const CUSTOMER_ID = 'customer_id';
     public const CREATED_AT = 'created_at';
 
     /**
@@ -132,28 +131,6 @@ class SearchLog extends AbstractModel
     public function setResultsCount(int $resultsCount): static
     {
         return $this->setData(self::RESULTS_COUNT, $resultsCount);
-    }
-
-    /**
-     * Get customer ID
-     *
-     * @return int|null
-     */
-    public function getCustomerId(): ?int
-    {
-        $id = $this->getData(self::CUSTOMER_ID);
-        return $id ? (int) $id : null;
-    }
-
-    /**
-     * Set customer ID
-     *
-     * @param int|null $customerId
-     * @return $this
-     */
-    public function setCustomerId(?int $customerId): static
-    {
-        return $this->setData(self::CUSTOMER_ID, $customerId);
     }
 
     /**

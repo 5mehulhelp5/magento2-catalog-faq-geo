@@ -69,8 +69,24 @@ class ReindexCommand extends Command
             }
 
             $output->writeln('<info>Regenerating FAQ URL rewrites...</info>');
-            $this->urlRewriteGenerator->generateAll();
-            $output->writeln('<info>FAQ URL rewrites regenerated successfully.</info>');
+            $errors = $this->urlRewriteGenerator->generateAll();
+
+            if ($errors) {
+                // URL key collisions are skipped per entity instead of aborting the run,
+                // which would leave the rewrite table half-rebuilt.
+                foreach ($errors as $error) {
+                    $output->writeln('<comment>' . $error . '</comment>');
+                }
+                $output->writeln(
+                    sprintf(
+                        '<comment>FAQ URL rewrites regenerated with %d skipped %s (see above).</comment>',
+                        count($errors),
+                        count($errors) === 1 ? 'entity' : 'entities'
+                    )
+                );
+            } else {
+                $output->writeln('<info>FAQ URL rewrites regenerated successfully.</info>');
+            }
 
             return Command::SUCCESS;
         } catch (\Exception $e) {

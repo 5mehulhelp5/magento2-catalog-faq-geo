@@ -34,37 +34,9 @@
                     <label>URL Prefix</label>
                     <comment>URL key for the FAQ landing page (e.g. "faq")</comment>
                 </field>
-                <field id="add_to_toolbar" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Add Link to Toolbar</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="add_to_footer" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Add Link to Footer</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
                 <field id="allow_guest_questions" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Allow Guest Questions</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-            </group>
-
-            <!-- Home Page -->
-            <group id="home_page" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Home Page</label>
-                <field id="use_cms_page" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Use CMS Page</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="cms_page_id" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>CMS Page</label>
-                    <source_model>Magento\Cms\Model\Config\Source\Page</source_model>
-                    <depends>
-                        <field id="use_cms_page">1</field>
-                    </depends>
-                </field>
-                <field id="layout" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Layout</label>
-                    <source_model>Magendoo\Faq\Model\Source\Layout</source_model>
                 </field>
             </group>
 
@@ -73,10 +45,6 @@
                 <label>Navigation</label>
                 <field id="show_breadcrumbs" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Show Breadcrumbs</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="show_ask_button" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Show Ask Button</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="sort_categories_by" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -98,10 +66,6 @@
                 <field id="no_results_text" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>No Results Text</label>
                 </field>
-                <field id="include_categories_in_search" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Include Categories in Search</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
                 <field id="questions_per_category_page" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Questions Per Category Page</label>
                 </field>
@@ -112,8 +76,9 @@
                     <label>Short Answer Behavior</label>
                     <source_model>Magendoo\Faq\Model\Source\ShortAnswerBehavior</source_model>
                 </field>
-                <field id="tags_limit" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="tags_limit" translate="label comment" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Tags Limit</label>
+                    <comment>Maximum number of tags shown in the FAQ tag cloud. Set 0 for no limit.</comment>
                 </field>
             </group>
 
@@ -136,10 +101,6 @@
                 </field>
                 <field id="questions_limit" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Questions Limit</label>
-                </field>
-                <field id="short_answer_behavior" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Short Answer Behavior</label>
-                    <source_model>Magendoo\Faq\Model\Source\ShortAnswerBehavior</source_model>
                 </field>
             </group>
 
@@ -205,10 +166,6 @@
                 </field>
                 <field id="structured_data_enabled" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable Structured Data (JSON-LD)</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="rich_breadcrumbs" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Rich Breadcrumbs</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="robots_search_results" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">

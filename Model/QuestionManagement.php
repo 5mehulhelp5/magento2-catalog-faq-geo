@@ -22,7 +22,10 @@ use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\Email\Sender as EmailSender;
 use Magendoo\Faq\Model\ResourceModel\Question as ResourceQuestion;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magendoo\Faq\Model\Source\Rating\Type as RatingType;
 use Magento\Authorization\Model\UserContextInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Model\Group as CustomerGroup;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Customer\Model\Session as CustomerSession;
@@ -116,10 +119,26 @@ class QuestionManagement implements QuestionManagementInterface
     private UserContextInterface $userContext;
 
     /**
+     * @var CustomerRepositoryInterface
+     */
+    private CustomerRepositoryInterface $customerRepository;
+
+    /**
      * Vote types accepted by rateQuestion()
      */
     public const VOTE_POSITIVE = 'positive';
     public const VOTE_NEGATIVE = 'negative';
+
+    /**
+     * Vote type recorded for 1-5 star votes (rating/type = average_rating)
+     */
+    public const VOTE_TYPE_STAR = 'star';
+
+    /**
+     * Bounds of the star scale
+     */
+    private const STAR_MIN = 1;
+    private const STAR_MAX = 5;
 
     /**
      * @param QuestionRepositoryInterface $questionRepository
@@ -137,6 +156,7 @@ class QuestionManagement implements QuestionManagementInterface
      * @param FaqHelper $faqHelper
      * @param FilterManager $filterManager
      * @param UserContextInterface $userContext
+     * @param CustomerRepositoryInterface $customerRepository
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -154,7 +174,8 @@ class QuestionManagement implements QuestionManagementInterface
         RemoteAddress $remoteAddress,
         FaqHelper $faqHelper,
         FilterManager $filterManager,
-        UserContextInterface $userContext
+        UserContextInterface $userContext,
+        CustomerRepositoryInterface $customerRepository
     ) {
         $this->questionRepository = $questionRepository;
         $this->resourceQuestion = $resourceQuestion;
@@ -171,6 +192,7 @@ class QuestionManagement implements QuestionManagementInterface
         $this->faqHelper = $faqHelper;
         $this->filterManager = $filterManager;
         $this->userContext = $userContext;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -229,10 +251,17 @@ class QuestionManagement implements QuestionManagementInterface
         $question->setPosition(0);
 
         try {
-            return $this->questionRepository->save($question);
+            $savedQuestion = $this->questionRepository->save($question);
         } catch (\Exception $e) {
             throw new CouldNotSaveException(__('Could not save the question: %1', $e->getMessage()));
         }
+
+        // Both entry points (storefront form and anonymous REST) pass through
+        // here, so this is the single place the merchant is alerted about a
+        // new pending question.
+        $this->notifyAdmin($savedQuestion);
+
+        return $savedQuestion;
     }
 
     /**
@@ -240,12 +269,33 @@ class QuestionManagement implements QuestionManagementInterface
      */
     public function rateQuestion(int $questionId, string $voteType): bool
     {
-        if (!in_array($voteType, [self::VOTE_POSITIVE, self::VOTE_NEGATIVE], true)) {
+        // The vote value travels through the single $voteType parameter so
+        // every existing entry point (AJAX controller, anonymous REST route)
+        // keeps working unchanged: helpful/not-helpful modes accept
+        // positive/negative, the star mode accepts "1".."5". Which set is
+        // valid is decided by the configured rating type, matching what the
+        // storefront widget renders.
+        $starValue = null;
+        if ($this->faqHelper->getRatingType() === RatingType::AVERAGE_RATING) {
+            if (!ctype_digit($voteType)
+                || (int) $voteType < self::STAR_MIN
+                || (int) $voteType > self::STAR_MAX
+            ) {
+                throw new LocalizedException(__('Please provide a star rating between 1 and 5.'));
+            }
+            $starValue = (int) $voteType;
+        } elseif (!in_array($voteType, [self::VOTE_POSITIVE, self::VOTE_NEGATIVE], true)) {
             throw new LocalizedException(__('Invalid vote type.'));
         }
 
         // Verify question exists
         $this->questionRepository->getById($questionId);
+
+        // Like the identity below, login state is resolved server-side so the
+        // anonymous REST route and the AJAX controller share one guard.
+        if (!$this->customerSession->isLoggedIn() && !$this->faqHelper->isGuestRatingAllowed()) {
+            throw new LocalizedException(__('Please log in to rate this question.'));
+        }
 
         // The de-duplication key must never come from the caller: this method backs an
         // anonymous REST route, so a client that supplied its own ip_address/customer_id
@@ -278,14 +328,29 @@ class QuestionManagement implements QuestionManagementInterface
             'question_id' => $questionId,
             'customer_id' => $customerId,
             'ip_address' => $ipAddress,
-            'vote_type' => $voteType,
+            'vote_type' => $starValue !== null ? self::VOTE_TYPE_STAR : $voteType,
+            'value' => $starValue ?? 0,
             'created_at' => $this->dateTime->gmtDate(),
         ]);
 
-        // Update question rating counts
         $questionTable = $this->resourceConnection->getTableName('magendoo_faq_question');
 
-        if ($voteType === self::VOTE_POSITIVE) {
+        if ($starValue !== null) {
+            // average_rating is a genuine 0-5 average over the recorded star
+            // values. Helpful/not-helpful votes carry no scale, so they never
+            // contribute to it — they only move the counters below.
+            $select = $connection->select()
+                ->from($ratingTable, [new \Zend_Db_Expr('AVG(`value`)')])
+                ->where('question_id = ?', $questionId)
+                ->where('vote_type = ?', self::VOTE_TYPE_STAR);
+
+            $average = (float) $connection->fetchOne($select);
+            $connection->update(
+                $questionTable,
+                ['average_rating' => round($average, 2)],
+                ['question_id = ?' => $questionId]
+            );
+        } elseif ($voteType === self::VOTE_POSITIVE) {
             $connection->update(
                 $questionTable,
                 ['positive_rating' => new \Zend_Db_Expr('positive_rating + 1')],
@@ -298,21 +363,6 @@ class QuestionManagement implements QuestionManagementInterface
                 ['question_id = ?' => $questionId]
             );
         }
-
-        // Recalculate average rating
-        $select = $connection->select()
-            ->from($questionTable, ['positive_rating', 'negative_rating'])
-            ->where('question_id = ?', $questionId);
-
-        $row = $connection->fetchRow($select);
-        $total = (int) $row['positive_rating'] + (int) $row['negative_rating'];
-        $average = $total > 0 ? (float) $row['positive_rating'] / $total * 100 : 0;
-
-        $connection->update(
-            $questionTable,
-            ['average_rating' => round($average, 2)],
-            ['question_id = ?' => $questionId]
-        );
 
         return true;
     }
@@ -327,6 +377,10 @@ class QuestionManagement implements QuestionManagementInterface
         $collection->addActiveFilter();
         $collection->addVisibilityFilter(QuestionInterface::VISIBILITY_PUBLIC);
         $collection->addStoreFilter($storeId);
+        // The storefront blocks scope their collections by customer group;
+        // this anonymous REST-reachable method must apply the same predicate
+        // or a group-restricted question stays readable without logging in.
+        $collection->addCustomerGroupVisibilityFilter($this->resolveCustomerGroupId());
         $collection->setOrder('position', 'ASC');
 
         $searchResults = $this->searchResultsFactory->create();
@@ -346,6 +400,9 @@ class QuestionManagement implements QuestionManagementInterface
         $collection->addActiveFilter();
         $collection->addVisibilityFilter(QuestionInterface::VISIBILITY_PUBLIC);
         $collection->addStoreFilter($storeId);
+        // Same customer-group predicate as the storefront blocks (see
+        // getProductQuestions()).
+        $collection->addCustomerGroupVisibilityFilter($this->resolveCustomerGroupId());
         $collection->setOrder('position', 'ASC');
 
         $searchResults = $this->searchResultsFactory->create();
@@ -365,6 +422,9 @@ class QuestionManagement implements QuestionManagementInterface
         $collection->addActiveFilter();
         $collection->addVisibilityFilter(QuestionInterface::VISIBILITY_PUBLIC);
         $collection->addStoreFilter($storeId);
+        // Same customer-group predicate as the storefront blocks (see
+        // getProductQuestions()).
+        $collection->addCustomerGroupVisibilityFilter($this->resolveCustomerGroupId());
 
         $searchResults = $this->searchResultsFactory->create();
         $searchResults->setTotalCount($collection->getSize());
@@ -448,6 +508,71 @@ class QuestionManagement implements QuestionManagementInterface
         } catch (\Exception $e) {
             $this->logger->error(__('Failed to log FAQ search term: %1', $e->getMessage()));
         }
+    }
+
+    /**
+     * Notify the merchant that a new question arrived.
+     *
+     * Gated on the admin_notifications/enabled flag so a disabled feature is
+     * not reported as a failure. A failed send is logged, never surfaced:
+     * the shopper's submission already succeeded and must not error out
+     * because of mail transport trouble.
+     *
+     * @param QuestionInterface $question
+     * @return void
+     */
+    private function notifyAdmin(QuestionInterface $question): void
+    {
+        if (!$this->faqHelper->isAdminNotificationEnabled()) {
+            return;
+        }
+
+        try {
+            if (!$this->emailSender->sendAdminNotification($question)) {
+                $this->logger->error(
+                    'Magendoo FAQ: admin notification was not sent for question '
+                    . (int) $question->getQuestionId()
+                    . '; check the admin notification recipient and template configuration.'
+                );
+            }
+        } catch (\Exception $e) {
+            $this->logger->error(
+                'Magendoo FAQ: admin notification failed for question '
+                . (int) $question->getQuestionId() . ': ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Resolve the current caller's customer group server-side.
+     *
+     * Storefront requests carry the group on the customer session; REST
+     * token requests only populate the user context, so the group is read
+     * back from the customer record. Anonymous callers fall back to the
+     * NOT LOGGED IN group, mirroring how the storefront blocks scope their
+     * collections.
+     *
+     * @return int
+     */
+    private function resolveCustomerGroupId(): int
+    {
+        if ($this->customerSession->isLoggedIn()) {
+            return (int) $this->customerSession->getCustomerGroupId();
+        }
+
+        if ($this->userContext->getUserType() === UserContextInterface::USER_TYPE_CUSTOMER
+            && $this->userContext->getUserId()
+        ) {
+            try {
+                $customer = $this->customerRepository->getById((int) $this->userContext->getUserId());
+
+                return (int) $customer->getGroupId();
+            } catch (NoSuchEntityException | LocalizedException $e) {
+                return CustomerGroup::NOT_LOGGED_IN_ID;
+            }
+        }
+
+        return CustomerGroup::NOT_LOGGED_IN_ID;
     }
 
     /**

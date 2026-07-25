@@ -23,4 +23,16 @@
         <observer name="magendoo_faq_question_url_rewrite"
                   instance="Magendoo\Faq\Observer\UrlRewrite\QuestionSaveObserver"/>
     </event>
+
+    <!-- Category URL rewrite cleanup on delete -->
+    <event name="magendoo_faq_category_delete_after">
+        <observer name="magendoo_faq_category_url_rewrite_delete"
+                  instance="Magendoo\Faq\Observer\UrlRewrite\CategoryDeleteObserver"/>
+    </event>
+
+    <!-- Question URL rewrite cleanup on delete -->
+    <event name="magendoo_faq_question_delete_after">
+        <observer name="magendoo_faq_question_url_rewrite_delete"
+                  instance="Magendoo\Faq\Observer\UrlRewrite\QuestionDeleteObserver"/>
+    </event>
 </config>

@@ -19,8 +19,10 @@ use Magendoo\Faq\Model\ResourceModel\Category as CategoryResource;
 use Magendoo\Faq\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magendoo\Faq\Model\ResourceModel\Question as QuestionResource;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\UrlRewrite\Model\Exception\UrlAlreadyExistsException;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewrite;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewriteFactory;
@@ -33,8 +35,8 @@ class FaqUrlRewriteGenerator
     /**
      * Entity type constants
      */
-    private const ENTITY_TYPE_CATEGORY = 'faq-category';
-    private const ENTITY_TYPE_QUESTION = 'faq-question';
+    public const ENTITY_TYPE_CATEGORY = 'faq-category';
+    public const ENTITY_TYPE_QUESTION = 'faq-question';
 
     /**
      * @var UrlPersistInterface
@@ -111,6 +113,7 @@ class FaqUrlRewriteGenerator
      *
      * @param CategoryInterface $category
      * @return void
+     * @throws AlreadyExistsException
      */
     public function generateForCategory(CategoryInterface $category): void
     {
@@ -143,7 +146,7 @@ class FaqUrlRewriteGenerator
         }
 
         if (!empty($urls)) {
-            $this->urlPersist->replace($urls);
+            $this->persistRewrites($urls, $urlKey);
         }
     }
 
@@ -152,6 +155,7 @@ class FaqUrlRewriteGenerator
      *
      * @param QuestionInterface $question
      * @return void
+     * @throws AlreadyExistsException
      */
     public function generateForQuestion(QuestionInterface $question): void
     {
@@ -184,17 +188,29 @@ class FaqUrlRewriteGenerator
         }
 
         if (!empty($urls)) {
-            $this->urlPersist->replace($urls);
+            $this->persistRewrites($urls, $urlKey);
         }
     }
 
     /**
      * Regenerate URL rewrites for all categories and questions
      *
-     * @return void
+     * Performs a full rebuild: every FAQ rewrite is purged first, so rows orphaned by
+     * deleted or unpublished entities (including rows left behind by module versions
+     * that never removed rewrites on delete) are cleaned up by a single run.
+     *
+     * An entity whose URL key collides with an existing rewrite is skipped and reported
+     * instead of aborting the run and leaving the table half-rebuilt.
+     *
+     * @return string[] Human-readable messages for entities that had to be skipped
      */
-    public function generateAll(): void
+    public function generateAll(): array
     {
+        $errors = [];
+
+        $this->urlPersist->deleteByData([UrlRewrite::ENTITY_TYPE => self::ENTITY_TYPE_CATEGORY]);
+        $this->urlPersist->deleteByData([UrlRewrite::ENTITY_TYPE => self::ENTITY_TYPE_QUESTION]);
+
         // The collections do not hydrate the store junction, so store_ids has to be looked up
         // per entity. Without it every entity would fall through to "all stores" and a single
         // run of this command would un-scope every rewrite in the store.
@@ -206,7 +222,16 @@ class FaqUrlRewriteGenerator
             }
             $categoryId = (int) $category->getCategoryId();
             $category->setData('store_ids', $this->categoryResource->lookupStoreIds($categoryId));
-            $this->generateForCategory($category);
+            try {
+                $this->generateForCategory($category);
+            } catch (AlreadyExistsException $exception) {
+                $errors[] = sprintf(
+                    'Category "%s" (id %d) skipped: %s',
+                    $category->getName(),
+                    $categoryId,
+                    $exception->getMessage()
+                );
+            }
         }
 
         $questionCollection = $this->questionCollectionFactory->create();
@@ -217,8 +242,19 @@ class FaqUrlRewriteGenerator
             }
             $questionId = (int) $question->getQuestionId();
             $question->setData('store_ids', $this->questionResource->lookupStoreIds($questionId));
-            $this->generateForQuestion($question);
+            try {
+                $this->generateForQuestion($question);
+            } catch (AlreadyExistsException $exception) {
+                $errors[] = sprintf(
+                    'Question "%s" (id %d) skipped: %s',
+                    $question->getTitle(),
+                    $questionId,
+                    $exception->getMessage()
+                );
+            }
         }
+
+        return $errors;
     }
 
     /**
@@ -234,6 +270,54 @@ class FaqUrlRewriteGenerator
             UrlRewrite::ENTITY_TYPE => $entityType,
             UrlRewrite::ENTITY_ID => $entityId,
         ]);
+    }
+
+    /**
+     * Persist rewrites, converting the storage-level duplicate failure into an actionable error
+     *
+     * Categories and questions share one flat "<prefix>/<url_key>" namespace with every other
+     * rewrite in the store (CMS pages, products, ...), and url_rewrite has a unique
+     * request_path + store_id index. Relying on that index instead of a pre-check keeps the
+     * validation race-free; the raw "URL key for specified store already exists." message is
+     * replaced with one that names the conflicting request path so the failure is fixable.
+     *
+     * @param UrlRewrite[] $urls
+     * @param string $urlKey
+     * @return void
+     * @throws AlreadyExistsException
+     */
+    private function persistRewrites(array $urls, string $urlKey): void
+    {
+        try {
+            $this->urlPersist->replace($urls);
+        } catch (UrlAlreadyExistsException $exception) {
+            $conflicts = [];
+            foreach ($exception->getUrls() as $url) {
+                if (is_array($url) && isset($url[UrlRewrite::REQUEST_PATH])) {
+                    $conflicts[] = sprintf(
+                        '"%s" (store %s)',
+                        $url[UrlRewrite::REQUEST_PATH],
+                        $url[UrlRewrite::STORE_ID] ?? '?'
+                    );
+                }
+            }
+            throw new AlreadyExistsException(
+                __(
+                    'The URL key "%1" is already used by another page (%2). Please choose a different URL key.',
+                    $urlKey,
+                    $conflicts ? implode(', ', $conflicts) : __('an existing URL rewrite')
+                ),
+                $exception
+            );
+        } catch (AlreadyExistsException $exception) {
+            throw new AlreadyExistsException(
+                __(
+                    'The URL key "%1" is already used by another page. Please choose a different URL key.',
+                    $urlKey
+                ),
+                $exception
+            );
+        }
     }
 
     /**
