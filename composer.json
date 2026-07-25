@@ -2,12 +2,11 @@
     "name": "magendoo/module-faq",
     "description": "Magento 2 FAQ and Product Questions module — SEO-optimized FAQ pages, product Q&A tabs, ask-a-question forms, ratings, and admin knowledge base management.",
     "type": "magento2-module",
-    "version": "1.0.0",
     "license": "MIT",
     "authors": [
         {
             "name": "Magendoo",
-            "homepage": "https://magendoo.com"
+            "homepage": "https://magendoo.ro"
         }
     ],
     "require": {
