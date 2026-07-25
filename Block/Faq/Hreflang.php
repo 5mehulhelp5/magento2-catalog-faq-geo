@@ -197,7 +197,13 @@ class Hreflang extends Template
             return null;
         }
 
-        /** @var \Magento\Framework\Model\AbstractModel $entity */
+        /**
+         * The repositories return interfaces, but every concrete FAQ entity is an
+         * AbstractModel; the intersection keeps getData() resolvable without widening
+         * (and thus contradicting) the type inferred above.
+         *
+         * @var (\Magendoo\Faq\Api\Data\CategoryInterface|\Magendoo\Faq\Api\Data\QuestionInterface)&\Magento\Framework\Model\AbstractModel $entity
+         */
         $storeIds = $entity->getData('store_ids');
 
         return [$urlKey, is_array($storeIds) ? array_map('intval', $storeIds) : []];

@@ -330,7 +330,7 @@ class FaqUrlRewriteGenerator
      */
     private function getStoreIdsForEntity(CategoryInterface|QuestionInterface $entity): array
     {
-        /** @var \Magento\Framework\DataObject $entity */
+        /** @var (CategoryInterface|QuestionInterface)&\Magento\Framework\DataObject $entity */
         $storeIds = $entity->getData('store_ids');
 
         if (is_array($storeIds) && !empty($storeIds)) {

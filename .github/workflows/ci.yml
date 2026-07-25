@@ -16,6 +16,14 @@ jobs:
       matrix:
         php: [ '8.1', '8.2', '8.3', '8.4' ]
 
+    # The `secrets` context is not available in a step-level `if:` — referencing it there
+    # makes the whole file invalid ("Unrecognized named-value: 'secrets'") and every run
+    # fails in 0s before a single step starts. Surfacing the key as a job-level env var
+    # gives the step something it is allowed to test.
+    env:
+      MAGENTO_MARKETPLACE_PUBLIC_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}
+      MAGENTO_MARKETPLACE_PRIVATE_KEY: ${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -32,12 +40,12 @@ jobs:
       # reviewer ever sees the change. Skip it when the keys are unavailable and let
       # Composer fall back to the public sources.
       - name: Add Magento repository
-        if: ${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY != '' }}
+        if: env.MAGENTO_MARKETPLACE_PUBLIC_KEY != ''
         run: |
           composer config repositories.magento composer https://repo.magento.com/
           composer config http-basic.repo.magento.com \
-            "${{ secrets.MAGENTO_MARKETPLACE_PUBLIC_KEY }}" \
-            "${{ secrets.MAGENTO_MARKETPLACE_PRIVATE_KEY }}"
+            "$MAGENTO_MARKETPLACE_PUBLIC_KEY" \
+            "$MAGENTO_MARKETPLACE_PRIVATE_KEY"
 
       - name: Cache Composer packages
         uses: actions/cache@v4
@@ -49,11 +57,22 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
+      # Analysis runs on the newest supported PHP only, because it analyses the *test* code
+      # too and the dev toolchain is not uniform across the matrix: PHPUnit 12 needs PHP 8.3+,
+      # so 8.1/8.2 resolve PHPUnit 10.5, where the suite's #[AllowMockObjectsWithoutExpectations]
+      # attribute does not exist and PHPStan rightly says so. Tests and the coding standard
+      # still run on every leg, which is where per-version behaviour actually shows up.
+      #
+      # --memory-limit, not `php -d`: PHPStan's parallel workers are separate processes and
+      # do not inherit an ini override. A worker that dies at the default 128M leaves the
+      # class index incomplete, which surfaces as a pile of bogus "undefined method" errors.
       - name: PHPStan
-        run: vendor/bin/phpstan analyse --no-progress
+        if: matrix.php == '8.4'
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
+      # Scope to the module: `.` is the checkout root, which also holds the installed vendor/
       - name: Coding standard
-        run: vendor/bin/phpcs --standard=Magento2 --warning-severity=0 .
+        run: vendor/bin/phpcs --standard=Magento2 --warning-severity=0 --ignore='vendor/*' .
 
       - name: Unit tests
         run: vendor/bin/phpunit -c phpunit.xml.dist

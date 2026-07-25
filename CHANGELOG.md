@@ -7,6 +7,41 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Fixed
+
+- **The test suite and the static analysis now run outside a Magento install.** Everything
+  below was invisible locally, where the module lives inside an install, and broke the moment
+  the repository was checked out on its own:
+  - `composer install` aborted because `dealerdirect/phpcodesniffer-composer-installer` — a
+    plugin `magento/magento-coding-standard` depends on — was not in `config.allow-plugins`.
+  - `magento/magento-coding-standard` was pinned to `^32 || ^33`, neither of which supports
+    PHP 8.4, so dependency resolution failed outright on current PHP. Now `^38 || ^39 || ^40`.
+  - PHPStan excluded `vendor` from *reporting* but still indexed it as project source, which
+    pulled in `rector/rector`'s stub of `PHPUnit\Framework\TestCase` — a stub with a single
+    method — shadowing the real class and making every inherited assertion in the suite look
+    undefined (177 phantom errors). It is now excluded from indexing as well.
+  - The "Magento generates factories at DI compile time" ignore patterns used `[A-Za-z\\]+`
+    and so never matched Magento's versioned service contracts, e.g.
+    `Magento\UrlRewrite\Service\V1\Data\UrlRewriteFactory` — the `V1` contains a digit.
+  - `phpunit.xml.dist` hard-coded a bootstrap path four levels up into the install. It now
+    points at `Test/bootstrap.php`, which uses the install's unit framework when present and
+    the module's own Composer autoloader otherwise, supplying the DI-generated factories the
+    suite doubles.
+  - `phpcs` was pointed at the checkout root, which in a standalone checkout also contains
+    the installed `vendor/`.
+- **`@var` annotations no longer contradict the type they narrow.** `Block/Faq/Hreflang.php`
+  and `Model/UrlRewrite/FaqUrlRewriteGenerator.php` widened `$entity` to `AbstractModel` /
+  `DataObject` to reach `getData()`; both now intersect with the declared interfaces instead.
+
+### Changed
+
+- CI no longer fails before it starts. The workflow referenced the `secrets` context from a
+  step-level `if:`, which is not permitted and made the file invalid, so every push failed in
+  zero seconds without running a step. Static analysis is scoped to the newest supported PHP
+  (the suite's PHPUnit 12 attributes only exist where PHPUnit 12 can install); unit tests and
+  the coding standard still run across PHP 8.1–8.4. The release job no longer fails when a
+  release already exists for the tag being built.
+
 ## [2.0.1] - 2026-07-25
 
 ### Fixed
