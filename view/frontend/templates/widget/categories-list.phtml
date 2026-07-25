@@ -16,14 +16,14 @@ declare(strict_types=1);
 <?php if ($categories->getSize()): ?>
 <div class="faq-widget faq-widget-categories">
     <?php if ($block->getBlockTitle()): ?>
-    <h3 class="faq-widget-title"><?= $block->escapeHtml($block->getBlockTitle()) ?></h3>
+    <h3 class="faq-widget-title"><?= $escaper->escapeHtml($block->getBlockTitle()) ?></h3>
     <?php endif; ?>
     <ul class="faq-widget-list">
         <?php foreach ($categories as $category): ?>
         <li class="faq-widget-item">
-            <a href="<?= $block->escapeUrl($block->getCategoryUrl($category)) ?>"
+            <a href="<?= $escaper->escapeUrl($block->getCategoryUrl($category)) ?>"
                class="faq-widget-link">
-                <?= $block->escapeHtml($category->getName()) ?>
+                <?= $escaper->escapeHtml($category->getName()) ?>
                 <?php if ($block->showQuestionCount()): ?>
                 <span class="count">(<?= (int) $block->getQuestionCount($category) ?>)</span>
                 <?php endif; ?>

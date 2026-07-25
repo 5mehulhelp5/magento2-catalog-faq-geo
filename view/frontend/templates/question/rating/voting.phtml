@@ -15,19 +15,19 @@
 <div class="faq-rating faq-rating--voting"
      data-question-id="<?= (int) $question->getQuestionId() ?>"
      data-mage-init='{"faqRating": {}}'>
-    <span class="rating-label"><?= $block->escapeHtml(__('Rate this answer:')) ?></span>
+    <span class="rating-label"><?= $escaper->escapeHtml(__('Rate this answer:')) ?></span>
     <button type="button" class="action faq-rate faq-rate--up" data-vote="positive"
-            data-url="<?= $block->escapeUrl($block->getRateUrl()) ?>"
-            title="<?= $block->escapeHtmlAttr(__('Thumbs up')) ?>">
+            data-url="<?= $escaper->escapeUrl($block->getRateUrl()) ?>"
+            title="<?= $escaper->escapeHtmlAttr(__('Thumbs up')) ?>">
         <span class="thumb-icon" aria-hidden="true">&#128077;</span>
-        <span class="label-text"><?= $block->escapeHtml(__('Helpful')) ?></span>
+        <span class="label-text"><?= $escaper->escapeHtml(__('Helpful')) ?></span>
         <span class="count">(<?= (int) $block->getPositiveCount() ?>)</span>
     </button>
     <button type="button" class="action faq-rate faq-rate--down" data-vote="negative"
-            data-url="<?= $block->escapeUrl($block->getRateUrl()) ?>"
-            title="<?= $block->escapeHtmlAttr(__('Thumbs down')) ?>">
+            data-url="<?= $escaper->escapeUrl($block->getRateUrl()) ?>"
+            title="<?= $escaper->escapeHtmlAttr(__('Thumbs down')) ?>">
         <span class="thumb-icon" aria-hidden="true">&#128078;</span>
-        <span class="label-text"><?= $block->escapeHtml(__('Not helpful')) ?></span>
+        <span class="label-text"><?= $escaper->escapeHtml(__('Not helpful')) ?></span>
         <span class="count">(<?= (int) $block->getNegativeCount() ?>)</span>
     </button>
 </div>

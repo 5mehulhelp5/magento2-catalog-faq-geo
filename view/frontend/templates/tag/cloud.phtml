@@ -13,12 +13,12 @@
 <?php $tags = $block->getTags(); ?>
 <?php if (count($tags)): ?>
 <div class="faq-tag-cloud">
-    <h3 class="faq-tag-title"><?= $block->escapeHtml(__('Tags')) ?></h3>
+    <h3 class="faq-tag-title"><?= $escaper->escapeHtml(__('Tags')) ?></h3>
     <div class="faq-tags">
         <?php foreach ($tags as $tag): ?>
-        <a href="<?= $block->escapeUrl($block->getTagUrl($tag)) ?>"
-           class="faq-tag <?= $block->escapeHtmlAttr($block->getTagSize($tag)) ?>">
-            <?= $block->escapeHtml($tag->getName()) ?>
+        <a href="<?= $escaper->escapeUrl($block->getTagUrl($tag)) ?>"
+           class="faq-tag <?= $escaper->escapeHtmlAttr($block->getTagSize($tag)) ?>">
+            <?= $escaper->escapeHtml($tag->getName()) ?>
             <span class="count">(<?= (int) $block->getTagCount($tag) ?>)</span>
         </a>
         <?php endforeach; ?>

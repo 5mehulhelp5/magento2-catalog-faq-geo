@@ -12,17 +12,17 @@
 ?>
 <?php if ($block->isEnabled() && $block->getQuestion()): ?>
 <div class="faq-social-share">
-    <span class="share-label"><?= $block->escapeHtml(__('Share:')) ?></span>
+    <span class="share-label"><?= $escaper->escapeHtml(__('Share:')) ?></span>
     <?php foreach ($block->getNetworks() as $network): ?>
         <?php $shareUrl = $block->getShareUrl($network); ?>
         <?php if ($shareUrl === ''): ?>
             <?php continue; ?>
         <?php endif; ?>
-        <a href="<?= $block->escapeUrl($shareUrl) ?>"
+        <a href="<?= $escaper->escapeUrl($shareUrl) ?>"
            target="_blank" rel="noopener noreferrer nofollow"
-           class="faq-share faq-share--<?= $block->escapeHtmlAttr($network) ?>"
-           title="<?= $block->escapeHtmlAttr(__('Share on %1', ucfirst($network))) ?>">
-            <?= $block->escapeHtml(ucfirst($network)) ?>
+           class="faq-share faq-share--<?= $escaper->escapeHtmlAttr($network) ?>"
+           title="<?= $escaper->escapeHtmlAttr(__('Share on %1', ucfirst($network))) ?>">
+            <?= $escaper->escapeHtml(ucfirst($network)) ?>
         </a>
     <?php endforeach; ?>
 </div>

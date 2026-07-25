@@ -16,17 +16,17 @@ declare(strict_types=1);
 <?php if ($questions->getSize()): ?>
 <div class="faq-widget faq-widget-questions">
     <?php if ($block->getBlockTitle()): ?>
-    <h3 class="faq-widget-title"><?= $block->escapeHtml($block->getBlockTitle()) ?></h3>
+    <h3 class="faq-widget-title"><?= $escaper->escapeHtml($block->getBlockTitle()) ?></h3>
     <?php endif; ?>
     <ul class="faq-widget-list">
         <?php foreach ($questions as $question): ?>
         <li class="faq-widget-item">
-            <a href="<?= $block->escapeUrl($block->getQuestionUrl($question)) ?>"
+            <a href="<?= $escaper->escapeUrl($block->getQuestionUrl($question)) ?>"
                class="faq-widget-link">
-                <?= $block->escapeHtml($question->getTitle()) ?>
+                <?= $escaper->escapeHtml($question->getTitle()) ?>
             </a>
             <?php if ($block->showAnswer()): ?>
-            <p class="faq-widget-answer"><?= $block->escapeHtml($block->getAnswerPreview($question)) ?></p>
+            <p class="faq-widget-answer"><?= $escaper->escapeHtml($block->getAnswerPreview($question)) ?></p>
             <?php endif; ?>
         </li>
         <?php endforeach; ?>
