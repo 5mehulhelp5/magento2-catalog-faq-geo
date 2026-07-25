@@ -1,3 +1,8 @@
+includes:
+    # Errors that predate this release are recorded rather than hidden: the file is a
+    # visible to-do list, and anything NEW fails the build instead of joining the noise.
+    - phpstan-baseline.neon
+
 parameters:
     level: 2
     paths:
@@ -9,4 +14,4 @@ parameters:
         # Magento generates Factory classes at DI compile time; they do not exist as source files
         - '#has unknown class [A-Za-z\\]+Factory as its type\.#'
         - '#has invalid type [A-Za-z\\]+Factory\.#'
-        - '#Call to method \w+ on an unknown class [A-Za-z\\]+Factory\.#'
+        - '#Call to method \w+\(\) on an unknown class [A-Za-z\\]+Factory\.#'

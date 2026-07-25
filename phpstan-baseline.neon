@@ -1,0 +1,156 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method Magendoo\\\\Faq\\\\Api\\\\Data\\\\CategoryInterface\\:\\:getExtensionAttributes\\(\\) has invalid return type Magendoo\\\\Faq\\\\Api\\\\Data\\\\CategoryExtensionInterface\\.$#"
+			count: 2
+			path: Api/Data/CategoryInterface.php
+
+		-
+			message: "#^Parameter \\$extensionAttributes of method Magendoo\\\\Faq\\\\Api\\\\Data\\\\CategoryInterface\\:\\:setExtensionAttributes\\(\\) has invalid type Magendoo\\\\Faq\\\\Api\\\\Data\\\\CategoryExtensionInterface\\.$#"
+			count: 2
+			path: Api/Data/CategoryInterface.php
+
+		-
+			message: "#^Method Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionInterface\\:\\:getExtensionAttributes\\(\\) has invalid return type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
+			count: 2
+			path: Api/Data/QuestionInterface.php
+
+		-
+			message: "#^Parameter \\$extensionAttributes of method Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionInterface\\:\\:setExtensionAttributes\\(\\) has invalid type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
+			count: 2
+			path: Api/Data/QuestionInterface.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\App\\\\RequestInterface\\:\\:getFullActionName\\(\\)\\.$#"
+			count: 1
+			path: Block/Faq/StructuredData.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\App\\\\RequestInterface\\:\\:getPostValue\\(\\)\\.$#"
+			count: 1
+			path: Controller/Adminhtml/Category/Save.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\App\\\\RequestInterface\\:\\:getPostValue\\(\\)\\.$#"
+			count: 1
+			path: Controller/Adminhtml/Question/Save.php
+
+		-
+			message: "#^Call to an undefined method Magendoo\\\\Faq\\\\Api\\\\Data\\\\CategoryInterface\\:\\:getData\\(\\)\\.$#"
+			count: 1
+			path: Controller/Category/View.php
+
+		-
+			message: "#^Cannot call method addCrumb\\(\\) on Magento\\\\Framework\\\\View\\\\Element\\\\BlockInterface\\|true\\.$#"
+			count: 3
+			path: Controller/Category/View.php
+
+		-
+			message: "#^Cannot call method addCrumb\\(\\) on Magento\\\\Framework\\\\View\\\\Element\\\\BlockInterface\\|true\\.$#"
+			count: 2
+			path: Controller/Index/Index.php
+
+		-
+			message: "#^Cannot call method addCrumb\\(\\) on Magento\\\\Framework\\\\View\\\\Element\\\\BlockInterface\\|true\\.$#"
+			count: 3
+			path: Controller/Question/Search.php
+
+		-
+			message: "#^Call to an undefined method Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionInterface\\:\\:setData\\(\\)\\.$#"
+			count: 1
+			path: Controller/Question/Submit.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\App\\\\RequestInterface\\:\\:isPost\\(\\)\\.$#"
+			count: 1
+			path: Controller/Question/Submit.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Store\\\\Api\\\\Data\\\\StoreInterface\\:\\:getBaseUrl\\(\\)\\.$#"
+			count: 1
+			path: Controller/Question/Suggest.php
+
+		-
+			message: "#^Call to an undefined method Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionInterface\\:\\:getData\\(\\)\\.$#"
+			count: 1
+			path: Controller/Question/View.php
+
+		-
+			message: "#^Cannot call method addCrumb\\(\\) on Magento\\\\Framework\\\\View\\\\Element\\\\BlockInterface\\|true\\.$#"
+			count: 3
+			path: Controller/Question/View.php
+
+		-
+			message: "#^Cannot call method addCrumb\\(\\) on Magento\\\\Framework\\\\View\\\\Element\\\\BlockInterface\\|true\\.$#"
+			count: 3
+			path: Controller/Tag/View.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Store\\\\Api\\\\Data\\\\StoreInterface\\:\\:getBaseUrl\\(\\)\\.$#"
+			count: 1
+			path: Helper/Data.php
+
+		-
+			message: "#^Method Magendoo\\\\Faq\\\\Model\\\\Category\\:\\:getExtensionAttributes\\(\\) has invalid return type Magendoo\\\\Faq\\\\Api\\\\Data\\\\CategoryExtensionInterface\\.$#"
+			count: 2
+			path: Model/Category.php
+
+		-
+			message: "#^Parameter \\$extensionAttributes of method Magendoo\\\\Faq\\\\Model\\\\Category\\:\\:setExtensionAttributes\\(\\) has invalid type Magendoo\\\\Faq\\\\Api\\\\Data\\\\CategoryExtensionInterface\\.$#"
+			count: 2
+			path: Model/Category.php
+
+		-
+			message: "#^Method Magendoo\\\\Faq\\\\Model\\\\Question\\:\\:getExtensionAttributes\\(\\) has invalid return type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
+			count: 2
+			path: Model/Question.php
+
+		-
+			message: "#^Parameter \\$extensionAttributes of method Magendoo\\\\Faq\\\\Model\\\\Question\\:\\:setExtensionAttributes\\(\\) has invalid type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
+			count: 2
+			path: Model/Question.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setCreatedAt\\(\\)\\.$#"
+			count: 1
+			path: Model/ResourceModel/Category.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setUpdatedAt\\(\\)\\.$#"
+			count: 1
+			path: Model/ResourceModel/Category.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setCreatedAt\\(\\)\\.$#"
+			count: 1
+			path: Model/ResourceModel/Question.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setUpdatedAt\\(\\)\\.$#"
+			count: 1
+			path: Model/ResourceModel/Question.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setCreatedAt\\(\\)\\.$#"
+			count: 1
+			path: Model/ResourceModel/SearchLog.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setCreatedAt\\(\\)\\.$#"
+			count: 1
+			path: Model/ResourceModel/Tag.php
+
+		-
+			message: "#^Class Magendoo\\\\Faq\\\\Model\\\\SearchLogFactory not found\\.$#"
+			count: 1
+			path: Test/Unit/Model/QuestionManagementTest.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\DataObject\\:\\:getId\\(\\)\\.$#"
+			count: 1
+			path: Ui/DataProvider/Form/CategoryDataProvider.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\DataObject\\:\\:getId\\(\\)\\.$#"
+			count: 1
+			path: Ui/DataProvider/Form/QuestionDataProvider.php
