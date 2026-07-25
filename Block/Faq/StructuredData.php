@@ -129,7 +129,17 @@ class StructuredData extends Template
             'mainEntity' => $mainEntity,
         ];
 
-        $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        // The result is emitted inside a <script type="application/ld+json"> element, so any
+        // literal "</script>" in the data would terminate the element and turn the remainder
+        // of the page into markup. Question titles are shopper-supplied, so the encoder must
+        // do the escaping: JSON_HEX_TAG escapes < and >, and the APOS/QUOT/AMP flags keep the
+        // payload inert in attribute and entity contexts too. Never add JSON_UNESCAPED_SLASHES
+        // here — the default "\/" escaping of forward slashes is part of the same protection.
+        // Magento uses the same flag set in Magento\Framework\Serialize\Serializer\JsonHexTag.
+        $json = json_encode(
+            $data,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+        );
 
         return $json !== false ? $json : '';
     }
