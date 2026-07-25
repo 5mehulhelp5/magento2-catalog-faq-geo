@@ -23,6 +23,7 @@ use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Api\QuestionManagementInterface;
 use Magendoo\Faq\Api\QuestionRepositoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\ResourceModel\Question as QuestionResource;
 
 /**
  * FAQ question view page controller
@@ -70,6 +71,11 @@ class View implements HttpGetActionInterface
     protected FaqHelper $faqHelper;
 
     /**
+     * @var QuestionResource
+     */
+    protected QuestionResource $questionResource;
+
+    /**
      * @param PageFactory $resultPageFactory
      * @param ResultFactory $resultFactory
      * @param RequestInterface $request
@@ -78,6 +84,7 @@ class View implements HttpGetActionInterface
      * @param StoreManagerInterface $storeManager
      * @param CustomerSession $customerSession
      * @param FaqHelper $faqHelper
+     * @param QuestionResource $questionResource
      */
     public function __construct(
         PageFactory $resultPageFactory,
@@ -87,7 +94,8 @@ class View implements HttpGetActionInterface
         QuestionManagementInterface $questionManagement,
         StoreManagerInterface $storeManager,
         CustomerSession $customerSession,
-        FaqHelper $faqHelper
+        FaqHelper $faqHelper,
+        QuestionResource $questionResource
     ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->resultFactory = $resultFactory;
@@ -97,6 +105,7 @@ class View implements HttpGetActionInterface
         $this->storeManager = $storeManager;
         $this->customerSession = $customerSession;
         $this->faqHelper = $faqHelper;
+        $this->questionResource = $questionResource;
     }
 
     /**
@@ -132,6 +141,19 @@ class View implements HttpGetActionInterface
         // For logged_in visibility, check if customer is logged in
         if ($visibility === QuestionInterface::VISIBILITY_LOGGED_IN && !$this->customerSession->isLoggedIn()) {
             return $this->forward404();
+        }
+
+        // Check customer group restriction. Every listing hides a
+        // group-restricted question (Collection::addCustomerGroupVisibilityFilter),
+        // so its direct URL must not stay readable either. An empty relation
+        // means unrestricted, mirroring the collection predicate; guests carry
+        // the NOT LOGGED IN group id on the session.
+        $allowedGroupIds = $this->questionResource->lookupCustomerGroupIds($questionId);
+        if ($allowedGroupIds !== []) {
+            $currentGroupId = (int) $this->customerSession->getCustomerGroupId();
+            if (!in_array($currentGroupId, $allowedGroupIds, true)) {
+                return $this->forward404();
+            }
         }
 
         // Check store assignment

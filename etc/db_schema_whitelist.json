@@ -76,7 +76,9 @@
             "exclude_sitemap": true,
             "hide_direct_url": true,
             "created_at": true,
-            "updated_at": true
+            "updated_at": true,
+            "consent_given_at": true,
+            "consent_text": true
         },
         "index": {
             "MAGENDOO_FAQ_QUESTION_URL_KEY": true,

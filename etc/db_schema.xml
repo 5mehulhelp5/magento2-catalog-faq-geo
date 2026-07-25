@@ -103,6 +103,14 @@
         <column xsi:type="varchar" name="sender_name" nullable="true" length="255" comment="Sender Name"/>
         <column xsi:type="varchar" name="sender_email" nullable="true" length="255" comment="Sender Email"/>
         <column xsi:type="int" name="customer_id" unsigned="true" nullable="true" comment="Customer ID"/>
+        <!-- GDPR consent record: WHEN consent was given (UTC, written by the
+             service via gmtDate(), never by the DB) and a snapshot of the
+             wording that was shown. TEXT because the configured wording is an
+             unbounded admin textarea — a varchar could silently truncate the
+             very sentence the record exists to prove. Both NULL when no
+             consent was required/recorded. -->
+        <column xsi:type="timestamp" name="consent_given_at" on_update="false" nullable="true" comment="GDPR Consent Given At (UTC)"/>
+        <column xsi:type="text" name="consent_text" nullable="true" comment="GDPR Consent Text Snapshot"/>
         <column xsi:type="int" name="positive_rating" unsigned="true" nullable="false" default="0" comment="Positive Rating Count"/>
         <column xsi:type="int" name="negative_rating" unsigned="true" nullable="false" default="0" comment="Negative Rating Count"/>
         <column xsi:type="decimal" name="average_rating" scale="2" precision="5" unsigned="true" nullable="false" default="0" comment="Average Rating"/>
