@@ -21,7 +21,7 @@
          columns="max"
          cacheResult="false"
          beStrictAboutTestsThatDoNotTestAnything="false"
-         bootstrap="../../../../dev/tests/unit/framework/bootstrap.php">
+         bootstrap="Test/bootstrap.php">
     <testsuites>
         <testsuite name="Magendoo_Faq_Unit_Tests">
             <directory>Test/Unit</directory>
@@ -33,6 +33,8 @@
         </include>
         <exclude>
             <directory>Test</directory>
+            <!-- Present only in a standalone checkout, where composer installs into the module -->
+            <directory>vendor</directory>
         </exclude>
     </source>
     <php>

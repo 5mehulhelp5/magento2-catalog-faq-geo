@@ -8,10 +8,32 @@ parameters:
     paths:
         - .
     excludePaths:
-        analyse:
+        # analyseAndScan, not analyse: "analyse" only silences errors reported *in* vendor,
+        # it still indexes every file there as project source. In a standalone checkout
+        # (CI clones the module and installs its own vendor/) that pulls in
+        # rector/rector's stubs-rector/PHPUnit/Framework/TestCase.php — a stub declaring
+        # only createMock() — which then shadows the real PHPUnit TestCase and makes every
+        # inherited assertion in Test/Unit look undefined. Vendor symbols still resolve,
+        # via the Composer autoloader.
+        analyseAndScan:
             - vendor
+    # The module is analysed in two very different contexts: inside a full Magento install
+    # (where DI-generated code exists under generated/) and as a standalone checkout in CI
+    # (where it does not). A single shared baseline therefore cannot match everywhere, and
+    # unmatched entries must not be errors in their own right.
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
-        # Magento generates Factory classes at DI compile time; they do not exist as source files
-        - '#has unknown class [A-Za-z\\]+Factory as its type\.#'
-        - '#has invalid type [A-Za-z\\]+Factory\.#'
-        - '#Call to method \w+\(\) on an unknown class [A-Za-z\\]+Factory\.#'
+        # Magento generates Factory classes at DI compile time; they do not exist as source
+        # files. The character class must allow digits: Magento namespaces version their
+        # service contracts (Magento\UrlRewrite\Service\V1\Data\UrlRewriteFactory), and
+        # [A-Za-z\\]+ silently fails to match every one of them.
+        - '#has unknown class [A-Za-z0-9_\\]+Factory as its type\.#'
+        - '#has invalid type [A-Za-z0-9_\\]+Factory\.#'
+        - '#Call to method \w+\(\) on an unknown class [A-Za-z0-9_\\]+Factory\.#'
+        - '#^Class [A-Za-z0-9_\\]+Factory not found\.$#'
+        # Extension attribute interfaces are generated from etc/extension_attributes.xml at
+        # DI compile time, so they are absent from a standalone checkout for the same reason
+        - '#[A-Za-z0-9_\\]+ExtensionInterface\.$#'
+        # PHPMD annotation, not a PHPDoc type: PHPStan's PHPDoc parser rejects the
+        # unquoted PHPMD.* value that Magento core itself uses everywhere
+        - '#^PHPDoc tag @SuppressWarnings has invalid value#'
