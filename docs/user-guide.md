@@ -206,9 +206,12 @@ bin/magento magendoo:faq:reindex                    # purge + regenerate all FAQ
 - Export includes store, category, product and customer-group assignments (as comma-separated
   IDs) and tag names.
 - Import updates rows whose `question_id`/`category_id` exists, creates rows with an empty id
-  cell, and skips-with-error rows referencing an unknown id. The four ID-list relation
-  columns are applied on import; the **tags column is not** (tag names are not mapped back to
-  tag IDs) — clear that column before re-importing and assign tags in the admin form.
+  cell, and skips-with-error rows referencing an unknown id. All relation columns round-trip,
+  including tags: the names in the tags column are matched to existing tags
+  (case-insensitively) and **any name that does not exist yet is created**. Since there is no
+  admin screen for creating tags, editing this column is the most practical way to add them in
+  bulk. An empty tags cell clears the question's tags; removing the column entirely leaves them
+  untouched.
 - Run the reindex after changing the URL prefix/suffix settings, or whenever FAQ URLs 404.
 
 ## Troubleshooting quick list

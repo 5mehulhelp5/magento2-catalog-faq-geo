@@ -7,6 +7,20 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-07-25
+
+### Fixed
+
+- **Exported tag names can now be re-imported.** `magendoo:faq:export` writes tags as names,
+  but nothing mapped them back to ids, so the name reached the junction table, cast to `0`
+  and violated the foreign key — aborting the whole row. A plain export → import round trip
+  failed on any question that had tags. Import now resolves names to ids case-insensitively
+  and **creates any tag that does not exist**, which also gives merchants the only bulk way to
+  add tags, since the module has no admin screen for creating them. Generated URL keys are
+  deterministic and de-duplicated, so importing the same file twice changes nothing.
+- The junction writer now drops anything that is not a positive integer instead of turning it
+  into a row that cannot exist, so no future caller can reproduce this class of failure.
+
 ## [2.0.0] - 2026-07-25
 
 A review-and-hardening release: 43 fixes across routing, security, caching, the admin surface,

@@ -445,12 +445,14 @@ class Question extends AbstractDb
 
         $connection->delete($table, ['question_id = ?' => $questionId]);
 
-        if (!empty($tagIds)) {
+        $ids = $this->normalizeTagIds($tagIds);
+
+        if ($ids !== []) {
             $data = [];
-            foreach ((array) $tagIds as $tagId) {
+            foreach ($ids as $tagId) {
                 $data[] = [
                     'question_id' => $questionId,
-                    'tag_id' => (int) $tagId,
+                    'tag_id' => $tagId,
                 ];
             }
             $connection->insertMultiple($table, $data);
@@ -523,5 +525,24 @@ class Question extends AbstractDb
 
         $groupIds = $connection->fetchCol($select);
         $object->setData('customer_group_ids', array_map('intval', $groupIds));
+    }
+
+    /**
+     * Reduce an incoming tag assignment to real ids.
+     *
+     * Only genuine ids may reach the junction table. A non-numeric value casts to 0 and
+     * violates the foreign key, which aborts the entire save — that is exactly how an
+     * exported tag NAME used to break re-import. Anything that is not a positive integer is
+     * dropped rather than turned into a row that cannot exist.
+     *
+     * @param mixed $tagIds
+     * @return int[]
+     */
+    private function normalizeTagIds(mixed $tagIds): array
+    {
+        return array_values(array_unique(array_filter(
+            array_map('intval', (array) $tagIds),
+            static fn (int $id): bool => $id > 0
+        )));
     }
 }

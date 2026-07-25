@@ -11,16 +11,6 @@ parameters:
 			path: Api/Data/CategoryInterface.php
 
 		-
-			message: "#^Method Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionInterface\\:\\:getExtensionAttributes\\(\\) has invalid return type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
-			count: 2
-			path: Api/Data/QuestionInterface.php
-
-		-
-			message: "#^Parameter \\$extensionAttributes of method Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionInterface\\:\\:setExtensionAttributes\\(\\) has invalid type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
-			count: 2
-			path: Api/Data/QuestionInterface.php
-
-		-
 			message: "#^Call to an undefined method Magento\\\\Framework\\\\App\\\\RequestInterface\\:\\:getFullActionName\\(\\)\\.$#"
 			count: 1
 			path: Block/Faq/StructuredData.php
@@ -101,16 +91,6 @@ parameters:
 			path: Model/Category.php
 
 		-
-			message: "#^Method Magendoo\\\\Faq\\\\Model\\\\Question\\:\\:getExtensionAttributes\\(\\) has invalid return type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
-			count: 2
-			path: Model/Question.php
-
-		-
-			message: "#^Parameter \\$extensionAttributes of method Magendoo\\\\Faq\\\\Model\\\\Question\\:\\:setExtensionAttributes\\(\\) has invalid type Magendoo\\\\Faq\\\\Api\\\\Data\\\\QuestionExtensionInterface\\.$#"
-			count: 2
-			path: Model/Question.php
-
-		-
 			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setCreatedAt\\(\\)\\.$#"
 			count: 1
 			path: Model/ResourceModel/Category.php
@@ -139,11 +119,6 @@ parameters:
 			message: "#^Call to an undefined method Magento\\\\Framework\\\\Model\\\\AbstractModel\\:\\:setCreatedAt\\(\\)\\.$#"
 			count: 1
 			path: Model/ResourceModel/Tag.php
-
-		-
-			message: "#^Class Magendoo\\\\Faq\\\\Model\\\\SearchLogFactory not found\\.$#"
-			count: 1
-			path: Test/Unit/Model/QuestionManagementTest.php
 
 		-
 			message: "#^Call to an undefined method Magento\\\\Framework\\\\DataObject\\:\\:getId\\(\\)\\.$#"
