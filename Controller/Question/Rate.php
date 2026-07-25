@@ -12,12 +12,12 @@ declare(strict_types=1);
 
 namespace Magendoo\Faq\Controller\Question;
 
-use Magento\Customer\Model\Session as CustomerSession;
+use Magendoo\Faq\Api\QuestionManagementInterface;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
-use Magendoo\Faq\Api\QuestionManagementInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 
 /**
  * AJAX question rating controller
@@ -40,34 +40,26 @@ class Rate implements HttpPostActionInterface
     protected QuestionManagementInterface $questionManagement;
 
     /**
-     * @var CustomerSession
+     * @var LoggerInterface
      */
-    protected CustomerSession $customerSession;
-
-    /**
-     * @var RemoteAddress
-     */
-    protected RemoteAddress $remoteAddress;
+    protected LoggerInterface $logger;
 
     /**
      * @param RequestInterface $request
      * @param JsonFactory $jsonFactory
      * @param QuestionManagementInterface $questionManagement
-     * @param CustomerSession $customerSession
-     * @param RemoteAddress $remoteAddress
+     * @param LoggerInterface $logger
      */
     public function __construct(
         RequestInterface $request,
         JsonFactory $jsonFactory,
         QuestionManagementInterface $questionManagement,
-        CustomerSession $customerSession,
-        RemoteAddress $remoteAddress
+        LoggerInterface $logger
     ) {
         $this->request = $request;
         $this->jsonFactory = $jsonFactory;
         $this->questionManagement = $questionManagement;
-        $this->customerSession = $customerSession;
-        $this->remoteAddress = $remoteAddress;
+        $this->logger = $logger;
     }
 
     /**
@@ -89,21 +81,24 @@ class Rate implements HttpPostActionInterface
             ]);
         }
 
-        $customerId = $this->customerSession->isLoggedIn()
-            ? (int) $this->customerSession->getCustomerId()
-            : null;
-        $ipAddress = (string) $this->remoteAddress->getRemoteAddress();
-
         try {
-            $this->questionManagement->rateQuestion($questionId, $voteType, $customerId, $ipAddress);
+            // Identity is resolved inside the service so every entry point shares one guard.
+            $this->questionManagement->rateQuestion($questionId, $voteType);
             return $result->setData([
                 'success' => true,
                 'message' => __('Thank you for your feedback!')
             ]);
-        } catch (\Exception $e) {
+        } catch (LocalizedException $e) {
             return $result->setData([
                 'success' => false,
                 'message' => $e->getMessage()
+            ]);
+        } catch (\Exception $e) {
+            // Never surface driver-level detail to an anonymous caller.
+            $this->logger->error('FAQ rating failed: ' . $e->getMessage());
+            return $result->setData([
+                'success' => false,
+                'message' => __('Your vote could not be recorded.')
             ]);
         }
     }

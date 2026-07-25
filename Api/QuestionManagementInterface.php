@@ -40,13 +40,11 @@ interface QuestionManagementInterface
      *
      * @param int $questionId
      * @param string $voteType
-     * @param int|null $customerId
-     * @param string $ipAddress
      * @return bool
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function rateQuestion(int $questionId, string $voteType, ?int $customerId, string $ipAddress): bool;
+    public function rateQuestion(int $questionId, string $voteType): bool;
 
     /**
      * Get questions associated with a product
