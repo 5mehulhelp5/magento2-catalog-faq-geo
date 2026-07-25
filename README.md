@@ -1,10 +1,12 @@
 # Magendoo FAQ & Product Questions Module for Magento 2
 
-[![Magento 2](https://img.shields.io/badge/Magento-2.4.x-orange.svg)](https://magento.com)
-[![PHP](https://img.shields.io/badge/PHP-8.0%2B-blue.svg)](https://php.net)
+[![Magento 2](https://img.shields.io/badge/Magento-2.4.x-orange.svg)](https://business.adobe.com/products/magento/magento-commerce.html)
+[![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive FAQ and Product Questions management system for Magento 2 that transforms customer support into a conversion driver through SEO-optimized knowledge bases, product-specific Q&A, and customer engagement tools.
+A FAQ and Product Questions management system for Magento 2: SEO-friendly FAQ pages, a
+product-page Q&A tab with an ask-a-question form, moderation workflow, ratings, search with
+analytics, CMS widgets, CSV import/export and a REST API.
 
 ## Screenshots
 
@@ -22,734 +24,454 @@ A comprehensive FAQ and Product Questions management system for Magento 2 that t
 
 ## Features
 
-- 📚 **Hierarchical FAQ Organization** — Categories, tags, and product associations
-- 🔍 **Advanced Search & Analytics** — Full-text search with search term reporting
-- ⭐ **Customer Engagement** — Rating system (thumbs up/down, star ratings)
-- 🔗 **Product Page Integration** — Dedicated FAQ tab on product detail pages
-- 📱 **Headless Ready** — Full REST API coverage for PWA/GraphQL implementations
-- 🔒 **Security First** — reCAPTCHA, GDPR compliance, ACL permissions
-- 📈 **SEO Optimized** — Structured data, sitemap integration, clean URLs
-- 🌍 **Multi-Store Support** — Store-specific content and customer group restrictions
+- **Hierarchical FAQ organization** — categories, tags, and product associations
+- **Search with analytics** — storefront FAQ search plus an admin Search Terms report
+- **Customer engagement** — helpfulness voting (Yes/No or thumbs up/down) or a 1–5 star rating
+- **Product page integration** — a "Product Questions" tab with an ask-a-question form
+- **REST API** — 24 endpoints; anonymous storefront routes return a privacy-safe projection
+- **Moderation workflow** — Pending → Answered / Rejected, with optional email notifications
+- **Compliance** — GDPR consent recording (timestamp + wording snapshot), native reCAPTCHA support
+- **SEO** — clean URLs with URL rewrites, FAQPage JSON-LD, sitemap integration, canonical links,
+  hreflang tags, per-entity robots meta
+- **Multi-store** — per-store-view assignment for categories and questions; customer-group
+  restrictions for B2B/B2C segmentation
 
-## Table of Contents
-
-- [Requirements](#requirements)
-- [Installation](#installation--deployment)
-- [Configuration](#configuration-reference)
-- [For E-Commerce Managers](#for-e-commerce-managers-business-value)
-- [For Developers](#for-developers-technical-architecture)
-- [REST API](#rest-api-endpoints)
-- [FAQ](#faq)
-- [Use Cases](#use-cases)
-- [Troubleshooting](#troubleshooting)
-- [Changelog](#changelog)
-- [License](#license)
-- [Contributing](#contributing)
-- [Support & Resources](#support--resources)
+A merchant-oriented walkthrough lives in [docs/user-guide.md](docs/user-guide.md).
 
 ## Requirements
 
 | Requirement | Version |
 |-------------|---------|
-| Magento | 2.4.x |
-| PHP | 8.0+ |
-| MySQL/MariaDB | 8.0+ / 10.4+ |
-| Composer | 2.x |
+| Magento Open Source / Adobe Commerce | 2.4.x (`magento/framework` >= 103.0.0) |
+| PHP | 8.1+ |
 
-### Supported Magento Editions
+Developed and tested against Magento Open Source 2.4.9 on PHP 8.4. Depends on the
+`Magento_Sitemap`, `Magento_Widget` and reCAPTCHA modules, all declared in `composer.json`
+(they ship with every standard Magento installation).
 
-- ✅ Magento Open Source (Community)
-- ✅ Adobe Commerce (Enterprise)
-- ✅ Adobe Commerce Cloud
+## Installation
 
----
-
-## For E-Commerce Managers: Business Value
-
-### Reduce Support Costs, Increase Conversions
-
-| Metric | Impact |
-|--------|--------|
-| **Support Tickets** | Proactive FAQ addressing reduces repetitive inquiries |
-| **SEO Traffic** | Structured data and SEO-friendly URLs drive organic discovery |
-| **Conversion Rate** | Product-specific Q&A removes purchase hesitation |
-| **Customer Trust** | Social proof through ratings and helpfulness voting |
-| **Content ROI** | Search analytics reveal knowledge gaps and content opportunities |
-
-### Core Business Features
-
-#### 📚 **Hierarchical Knowledge Organization**
-- **Categories** — Organize FAQs by topic, product line, or customer journey stage
-- **Tags** — Cross-reference questions for flexible discovery paths
-- **Product Association** — Link specific questions directly to product pages
-- **Multi-Store** — Tailor FAQs per storefront, language, or regional requirements
-
-#### 🔍 **Intelligent Search & Discovery**
-- Full-text search across questions and answers
-- Search term analytics dashboard — identify what customers can't find
-- Configurable results ranking and pagination
-- Search results with pagination and sorting
-
-#### ⭐ **Customer Engagement & Social Proof**
-- **Three Rating Modes:**
-  - *Yes/No Helpfulness* — "Was this answer helpful?"
-  - *Voting* — Thumbs up/down with vote counts
-  - *Star Rating* — Average 5-star rating display
-- **Social Sharing** — Drive traffic via Facebook, Twitter, LinkedIn, Pinterest
-- **View Counts** — Surface most-accessed content automatically
-
-#### 📧 **Automated Communication Workflow**
-- **Admin Notifications** — Instant alerts for new customer questions
-- **Customer Follow-up** — Automatic email when their question is answered
-- **Question Status Workflow:**
-  - `Pending` → Queue for review
-  - `Answered` → Published to storefront
-  - `Rejected` → Archived with note
-
-#### 🛡️ **Compliance & Security**
-- **GDPR Consent** — Configurable consent checkbox for question submissions
-- **reCAPTCHA Integration** — Native Magento reCAPTCHA v2/v3/invisible support
-- **Customer Group Restrictions** — Show/hide content by B2B/B2C segments
-- **Visibility Controls** — Public, logged-in-only, or hidden per question
-
-#### 📊 **Analytics & Insights**
-- Search Terms Report — What are customers searching for?
-- Rating analytics — Which answers are most/least helpful?
-- View tracking — Content performance metrics
-- Question submission trends — Identify emerging support topics
-
-#### 🔗 **Product Page Integration**
-- Dedicated FAQ tab on product detail pages
-- Configurable tab position and labeling
-- "Ask a Question" form embedded in product context
-- Shows only relevant Q&A for that specific product
-- Reduces cart abandonment by addressing objections at point of decision
-
----
-
-## For Developers: Technical Architecture
-
-### Service Contract Architecture
-
-The module implements Magento's Service Contract pattern for full API coverage and extensibility:
-
-```
-Api/
-├── CategoryRepositoryInterface      # Category CRUD
-├── QuestionRepositoryInterface      # Question CRUD  
-├── QuestionManagementInterface      # Business operations
-└── TagRepositoryInterface           # Tag CRUD
-```
-
-All repositories support:
-- `SearchCriteria` pattern for flexible querying
-- `getByUrlKey()` for SEO-friendly lookups
-- Full extension through DI preferences and plugins
-
-### REST API Endpoints
-
-Complete REST coverage for headless implementations:
-
-| Endpoint | Method | Access | Description |
-|----------|--------|--------|-------------|
-| `/V1/faq/categories` | GET/POST | admin | List or create categories |
-| `/V1/faq/categories/:id` | GET/PUT/DELETE | admin | Category CRUD |
-| `/V1/faq/categories/url-key/:key/store/:id` | GET | public | Lookup by URL key |
-| `/V1/faq/questions` | GET/POST | admin | List or create questions |
-| `/V1/faq/questions/:id` | GET/PUT/DELETE | admin | Question CRUD |
-| `/V1/faq/questions/url-key/:key/store/:id` | GET | public | Lookup by URL key |
-| `/V1/faq/questions/submit` | POST | public | Anonymous question submission |
-| `/V1/faq/questions/:id/rate` | POST | public | Submit rating/vote |
-| `/V1/faq/questions/:id/view` | POST | public | Increment view count |
-| `/V1/faq/questions/:id/notify` | POST | admin | Send answer notification email |
-| `/V1/faq/products/:id/questions` | GET | public | Product-specific Q&A |
-| `/V1/faq/categories/:id/questions` | GET | public | Category questions |
-| `/V1/faq/questions/search` | GET | public | Full-text search |
-| `/V1/faq/tags` | GET/POST | admin | List or create tags |
-| `/V1/faq/tags/:id` | GET/PUT/DELETE | admin | Tag CRUD |
-
-**24 endpoints total.**
-
-### Custom URL Router
-
-Implements `Magento\Framework\App\RouterInterface` for clean SEO URLs:
-
-```
-/faq/                                    → Home page (category listing + search)
-/faq/{category-url-key}                  → Category page
-/faq/{category-url-key}/{question-key}   → Question detail (within category)
-/faq/{question-url-key}                  → Question detail (URL rewrite)
-/faq/tag/{tag-url-key}                   → Tag page (questions with this tag)
-/faq/search?q=keyword                    → Search results
-/faq/question/suggest?q=keyword          → AJAX autocomplete (JSON)
-```
-
-**Features:**
-- Configurable URL prefix per store
-- Optional `.html` suffix
-- Trailing slash normalization
-- Automatic URL rewrite generation on entity save
-- CLI command for bulk regeneration: `bin/magento magendoo:faq:reindex`
-
-### CLI Commands
+### Composer
 
 ```bash
-# Regenerate FAQ URL rewrites for all categories and questions
+composer require magendoo/module-faq
+bin/magento module:enable Magendoo_Faq
+bin/magento setup:upgrade
+bin/magento cache:flush
 bin/magento magendoo:faq:reindex
-
-# Export questions or categories to CSV
-bin/magento magendoo:faq:export -e questions -f var/export/faq-questions.csv
-bin/magento magendoo:faq:export -e categories -f var/export/faq-categories.csv
-
-# Import questions or categories from CSV (upsert — creates new, updates existing)
-bin/magento magendoo:faq:import -e questions -f var/export/faq-questions.csv
-bin/magento magendoo:faq:import -e categories -f var/export/faq-categories.csv
 ```
 
-### CMS Widgets
+### Manual
 
-Three widgets for embedding FAQ content on any CMS page via the admin widget inserter:
-
-| Widget | Description |
-|--------|-------------|
-| **FAQ Questions List** | Displays questions, optionally filtered by category. List or accordion template. |
-| **FAQ Categories List** | Renders category links with optional question counts. |
-| **FAQ Search Box** | Embeds a search form with configurable placeholder text. |
-
-### Database Schema (12 Tables)
-
-**Core Entities:**
-- `magendoo_faq_category` — Category data with SEO fields
-- `magendoo_faq_question` — Question workflow, content, engagement metrics
-- `magendoo_faq_tag` — Tag taxonomy
-
-**Relationship Tables:**
-- `*_store` — Multi-store visibility
-- `*_customer_group` — Access control
-- `magendoo_faq_question_category` — Many-to-many categories
-- `magendoo_faq_question_product` — Product associations
-- `magendoo_faq_question_tag` — Tag assignments
-
-**Analytics Tables:**
-- `magendoo_faq_rating` — Individual vote tracking (prevents duplicates)
-- `magendoo_faq_search_log` — Search query analytics
-
-### SEO & Structured Data
-
-**Sitemap Integration:**
-- Implements `Magento\Sitemap\Model\ItemProvider\ItemProviderInterface`
-- Automatic inclusion in `sitemap.xml`
-- Configurable change frequency and priority per entity
-
-**Structured Data (Schema.org):**
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [{
-    "@type": "Question",
-    "name": "Question title",
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "Answer content"
-    }
-  }]
-}
+```bash
+cp -r Magendoo/Faq app/code/Magendoo/
+bin/magento module:enable Magendoo_Faq
+bin/magento setup:upgrade
+bin/magento cache:flush
+bin/magento magendoo:faq:reindex
 ```
 
-**Meta Controls:**
-- Per-entity meta title, description
-- Canonical URL override
-- Noindex/nofollow per entity
-- Robots meta for search results page
+In production mode also run `bin/magento setup:di:compile` and
+`bin/magento setup:static-content:deploy`.
 
-### Extensibility Points
+### Post-installation setup
 
-**Events:**
-- Standard Magento events on save/load/delete
-- Custom events for workflow transitions
+1. **Configure the module:** *Stores → Configuration → Magendoo Extensions → FAQ*
+2. **Set admin permissions:** *System → Permissions → User Roles* — the FAQ resources appear
+   under *Content → FAQ*
+3. **Enable reCAPTCHA (recommended):** *Stores → Configuration → Security → Google reCAPTCHA
+   Storefront* — set keys, then choose a type for **Enable for FAQ Ask a Question Form**
+4. **Create content:** *Content → FAQ → FAQ Categories* and *Content → FAQ → FAQ Questions*
 
-**Plugins:**
-- All public methods in repository interfaces
-- Controller actions
-- Block rendering
+### Uninstallation
 
-**DI Preferences:**
-- All interfaces can be overridden
-- Collection classes extensible
+The module does **not** ship a `Setup/Uninstall` class, and Magento does not process a disabled
+module's schema, so neither `module:disable` nor `composer remove` removes any data. To remove
+the module completely:
 
-**UI Components:**
-- Admin grids use Magento UI Component framework
-- XML merge support for customization
-- Custom column types available
-
-### Security Implementation
-
-**ACL Permissions (`etc/acl.xml`):**
-```
-Magendoo_Faq::faq                    # Root permission
-├── Magendoo_Faq::category_view      # View categories
-├── Magendoo_Faq::category_edit      # Create/edit categories
-├── Magendoo_Faq::category_delete    # Delete categories
-├── Magendoo_Faq::question_view      # View questions
-├── Magendoo_Faq::question_edit      # Create/edit questions
-├── Magendoo_Faq::question_delete    # Delete questions
-├── Magendoo_Faq::question_approve   # Approve pending questions
-├── Magendoo_Faq::search_log         # View search analytics
-└── Magendoo_Faq::config             # Module configuration
+```bash
+bin/magento module:disable Magendoo_Faq
+composer remove magendoo/module-faq   # or delete app/code/Magendoo/Faq
+bin/magento setup:upgrade
+bin/magento cache:flush
 ```
 
-**Form Security:**
-- Form key validation on all POST controllers
-- CSRF protection on AJAX rating endpoints
-- Input sanitization via Magento framework
-- SQL injection prevention via prepared statements
+Then, only if you also want to delete all FAQ data, drop the tables and rows manually
+(back up first):
 
-**Spam Prevention:**
-- reCAPTCHA observer on question submission
-- IP-based duplicate vote prevention
-- Customer ID tracking for authenticated users
-
-### Code Quality Standards
-
-- **PHP 8+ Features:** Constructor property promotion, union types, match expressions
-- **Strict Typing:** `declare(strict_types=1)` on all files
-- **Return Types:** Explicit declarations on all methods
-- **Static Analysis Friendly:** Full type coverage for IDE support
-- **PSR-12 Compliant:** Standard Magento code formatting
-
-### Frontend Architecture
-
-**RequireJS Components:**
-```javascript
-faqRating        // AJAX voting handler with duplicate-vote prevention
-faqSearch        // Search form validation
-faqAutocomplete  // Debounced AJAX autocomplete dropdown
-faqTabDeeplink   // Deep-link fix for product page FAQ tab (#product_faq)
+```sql
+DROP TABLE IF EXISTS magendoo_faq_question_tag, magendoo_faq_rating,
+  magendoo_faq_question_customer_group, magendoo_faq_question_product,
+  magendoo_faq_question_category, magendoo_faq_question_store,
+  magendoo_faq_category_customer_group, magendoo_faq_category_store,
+  magendoo_faq_search_log, magendoo_faq_question, magendoo_faq_category,
+  magendoo_faq_tag;
+DELETE FROM core_config_data WHERE path LIKE 'magendoo_faq/%';
+DELETE FROM url_rewrite WHERE entity_type IN ('faq-category', 'faq-question');
 ```
-
-**Layout Handles:**
-```
-faq_index_index      # FAQ homepage
-category_view        # Category page
-question_view        # Question detail
-question_search      # Search results
-```
-
-**Block Structure:**
-```
-Block/
-├── Faq/
-│   ├── Home.php              # Category grid + search
-│   ├── Category/View.php     # Category question list
-│   ├── Question/
-│   │   ├── View.php          # Question display
-│   │   ├── AskForm.php       # Submission form (GDPR + reCAPTCHA)
-│   │   ├── Rating.php        # Voting widget (3 modes)
-│   │   └── SocialShare.php   # Social buttons
-│   ├── Tag/
-│   │   ├── Cloud.php         # Tag cloud with size classes
-│   │   └── View.php          # Tag page question list
-│   ├── Search.php            # Search results
-│   ├── Breadcrumbs.php       # Navigation
-│   ├── Hreflang.php          # Multi-store SEO tags
-│   └── StructuredData.php    # JSON-LD (FAQPage schema)
-├── Product/Questions.php     # Product tab + deep-link fix
-├── Widget/
-│   ├── QuestionsList.php     # CMS widget: questions
-│   ├── CategoriesList.php    # CMS widget: categories
-│   └── SearchBox.php         # CMS widget: search form
-└── Adminhtml/                # Admin form buttons
-```
-
-### Admin Interface
-
-**UI Components:**
-- `faq_category_listing` — Category grid with mass actions
-- `faq_category_form` — Category edit with store/group selectors
-- `faq_question_listing` — Question grid with workflow filters
-- `faq_question_form` — Question edit with associations
-- `faq_search_log_grid` — Search analytics
-
-**Mass Actions:**
-- Delete, Change Status, Change Visibility for questions
-- Delete, Change Status for categories
 
 ---
 
 ## Configuration Reference
 
-### Path: `magendoo_faq/general`
+All settings live under *Stores → Configuration → Magendoo Extensions → FAQ* and can be set per
+store view. Defaults below come from `etc/config.xml`; fields without an entry there start
+empty/off.
+
+### `magendoo_faq/general`
 | Field | Default | Description |
 |-------|---------|-------------|
 | `enabled` | 1 | Module on/off |
-| `title` | "FAQ" | Page title |
-| `url_prefix` | "faq" | URL segment |
-| `allow_guest_questions` | 1 | Anonymous submissions |
+| `title` | `FAQ` | FAQ landing page title |
+| `url_prefix` | `faq` | URL segment for all FAQ pages |
+| `allow_guest_questions` | 1 | Allow guests to use the storefront ask form |
 
-### Path: `magendoo_faq/navigation`
+### `magendoo_faq/navigation`
 | Field | Default | Description |
 |-------|---------|-------------|
-| `show_breadcrumbs` | 1 | Breadcrumb display |
-| `show_search_box` | 1 | Search visibility |
-| `questions_per_category_page` | 10 | Pagination limit |
-| `answer_length_limit` | 200 | Short answer truncation |
-| `short_answer_behavior` | expand | How to show full answer |
+| `show_breadcrumbs` | 1 | Breadcrumb display on FAQ pages |
+| `sort_categories_by` | `position` | `position`, `name` or `most_viewed` |
+| `sort_questions_by` | `position` | `position`, `name` or `most_viewed` |
+| `answer_length_limit` | 250 | Character limit for answer previews in listings |
+| `show_search_box` | 1 | Search box on FAQ pages |
+| `no_results_text` | *(empty)* | Message when a search finds nothing |
+| `questions_per_category_page` | 10 | Pagination on category pages |
+| `questions_per_search_page` | 10 | Pagination on search results |
+| `short_answer_behavior` | `short_answer` | Listing preview source: `short_answer` or `cut_full_answer` (truncated full answer) |
+| `tags_limit` | 20 | Maximum tags in the tag cloud (0 = no limit) |
 
-### Path: `magendoo_faq/product_page`
+### `magendoo_faq/product_page`
 | Field | Default | Description |
 |-------|---------|-------------|
-| `enabled` | 1 | Tab visibility |
-| `tab_name` | "FAQ ({count})" | Tab label with count placeholder |
-| `tab_position` | 100 | Sort order |
-| `questions_limit` | 10 | Max questions shown |
+| `enabled` | 1 | Show the questions tab on product pages |
+| `tab_name` | `Product Questions` | Tab label; `{count}` is replaced with the question count |
+| `tab_position` | 40 | Tab sort order |
+| `show_ask_button` | 1 | Show the ask-a-question form in the tab |
+| `questions_limit` | 10 | Maximum questions shown in the tab |
 
-### Path: `magendoo_faq/rating`
+### `magendoo_faq/rating`
 | Field | Default | Description |
 |-------|---------|-------------|
-| `enabled` | 1 | Ratings active |
-| `type` | yes_no | yes_no / voting / average_rating |
-| `allow_guest_rating` | 1 | Guest voting allowed |
+| `enabled` | 1 | Rating widget on question pages |
+| `type` | `yes_no` | `yes_no`, `voting` (thumbs up/down) or `average_rating` (1–5 stars) |
+| `allow_guest_rating` | 1 | Allow guests to vote; when off, voting requires login |
 
-### Path: `magendoo_faq/seo`
+### `magendoo_faq/social`
 | Field | Default | Description |
 |-------|---------|-------------|
-| `url_suffix_enabled` | 0 | Append .html |
-| `structured_data_enabled` | 1 | JSON-LD output |
-| `add_to_sitemap` | 1 | Include in sitemap.xml |
+| `enabled` | 0 | Social share buttons on question pages |
+| `networks` | *(empty)* | Any of Facebook, Twitter, LinkedIn, Pinterest, Email |
 
-### Path: `magendoo_faq/gdpr`
+### `magendoo_faq/seo`
 | Field | Default | Description |
 |-------|---------|-------------|
-| `enabled` | 0 | Consent checkbox |
-| `consent_text` | ... | Custom consent message |
+| `url_suffix_enabled` | 0 | Append a suffix to FAQ URLs |
+| `url_suffix` | `.html` | The suffix (when enabled) |
+| `remove_trailing_slash` | 0 | Redirect trailing-slash URLs to the canonical form |
+| `use_canonical` | 0 | Emit a `<link rel="canonical">` on FAQ pages (per-entity override available) |
+| `structured_data_enabled` | 1 | FAQPage JSON-LD on category and question pages |
+| `robots_search_results` | `NOINDEX,FOLLOW` | Robots meta for the search results page |
+| `add_to_sitemap` | 1 | Include FAQ pages in the XML sitemap |
+| `hreflang_enabled` | 0 | Hreflang alternate links for multi-store setups |
+| `sitemap_frequency` | *(empty — falls back to `weekly`)* | Sitemap change frequency |
+| `sitemap_priority` | *(empty — falls back to `0.5`)* | Sitemap priority |
+
+### `magendoo_faq/user_notifications`
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | 0 | Email the asker when their question is answered |
+| `email_sender` | `general` | Sender identity |
+| `email_template` | `magendoo_faq_user_notifications_email_template` | Template |
+
+### `magendoo_faq/admin_notifications`
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | 0 | Email the store owner when a new question is submitted |
+| `send_to` | `admin@example.com` | Comma-separated recipient addresses |
+| `email_template` | `magendoo_faq_admin_notifications_email_template` | Template |
+
+### `magendoo_faq/gdpr`
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | 0 | Require a consent checkbox on the ask form |
+| `consent_text` | "I agree that my name and email address will be stored…" | Checkbox label. When consent is given, the timestamp and the wording shown are stored on the question |
+
+### reCAPTCHA
+
+The ask form registers with Magento's native reCAPTCHA framework as
+**FAQ Ask a Question Form** (`recaptcha_frontend/type_for/magendoo_faq_question_submit`) —
+configure it under *Stores → Configuration → Security → Google reCAPTCHA Storefront*.
 
 ---
 
-## Installation & Deployment
+## Storefront URLs
 
-### Composer Installation
+Implemented by a custom router (`Magento\Framework\App\RouterInterface`):
+
+```
+/faq/                                    → FAQ home (category listing + search)
+/faq/{category-url-key}                  → Category page
+/faq/{category-url-key}/{question-key}   → Question page (membership is verified;
+                                           mismatched pairs redirect to the canonical URL)
+/faq/{question-url-key}                  → Question page (via URL rewrite)
+/faq/tag/{tag-url-key}                   → Tag page
+/faq/search?q=keyword                    → Search results
+/faq/question/suggest?q=keyword          → AJAX autocomplete (JSON)
+```
+
+- Configurable URL prefix per store view; optional suffix.
+- Suffixed/unsuffixed and trailing-slash variants redirect to the canonical form
+  (trailing-slash redirect gated by `seo/remove_trailing_slash`).
+- URL rewrites are generated on save, cleaned up on delete/unpublish, and validated for
+  uniqueness (`url_key` is unique at the database level; collisions produce an actionable
+  error naming the conflicting path).
+- `bin/magento magendoo:faq:reindex` purges and regenerates all FAQ rewrites.
+
+## CLI Commands
+
 ```bash
-composer require magendoo/module-faq
-bin/magento module:enable Magendoo_Faq
-bin/magento setup:upgrade
-bin/magento setup:di:compile
+# Purge and regenerate FAQ URL rewrites for all categories and questions
 bin/magento magendoo:faq:reindex
+
+# Export questions or categories to CSV (default file: var/export/faq-{entity}.csv)
+bin/magento magendoo:faq:export -e questions -f var/export/faq-questions.csv
+bin/magento magendoo:faq:export -e categories
+
+# Import questions or categories from CSV
+bin/magento magendoo:faq:import -e questions -f var/export/faq-questions.csv
+bin/magento magendoo:faq:import -e categories -f var/export/faq-categories.csv
 ```
 
-### Manual Installation
-```bash
-cp -r Magendoo/Faq app/code/
-bin/magento module:enable Magendoo_Faq
-bin/magento setup:upgrade
-bin/magento setup:di:compile
-bin/magento cache:clean
-bin/magento magendoo:faq:reindex
+Export includes the relation columns (`store_ids`, `category_ids`, `product_ids`, `tags`,
+`customer_group_ids`) and defuses spreadsheet formula injection. Import updates rows whose
+`question_id`/`category_id` matches an existing record, creates rows with an empty id column,
+and skips (with a report) rows whose id does not exist.
+
+## REST API
+
+24 routes in `etc/webapi.xml`. **Auth** column: *admin* = admin/integration token with the named
+ACL resource; *customer* = a logged-in customer token; *anonymous* = no token required.
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/V1/faq/categories` | GET | admin (`Magendoo_Faq::category`) | List categories (SearchCriteria) |
+| `/V1/faq/categories/:id` | GET | admin (`Magendoo_Faq::category`) | Get category |
+| `/V1/faq/categories` | POST | admin (`Magendoo_Faq::category_edit`) | Create category |
+| `/V1/faq/categories/:id` | PUT | admin (`Magendoo_Faq::category_edit`) | Update category |
+| `/V1/faq/categories/:id` | DELETE | admin (`Magendoo_Faq::category_delete`) | Delete category |
+| `/V1/faq/questions` | GET | admin (`Magendoo_Faq::question`) | List questions (SearchCriteria) |
+| `/V1/faq/questions/:id` | GET | admin (`Magendoo_Faq::question`) | Get question (full object) |
+| `/V1/faq/questions` | POST | admin (`Magendoo_Faq::question_edit`) | Create question |
+| `/V1/faq/questions/:id` | PUT | admin (`Magendoo_Faq::question_edit`) | Update question |
+| `/V1/faq/questions/:id` | DELETE | admin (`Magendoo_Faq::question_delete`) | Delete question |
+| `/V1/faq/questions/submit` | POST | **customer** | Submit a question (see note below) |
+| `/V1/faq/questions/:id/rate` | POST | anonymous | Vote: `positive`/`negative`, or `"1"`–`"5"` in star mode |
+| `/V1/faq/products/:id/questions` | GET | anonymous | Product questions (public projection) |
+| `/V1/faq/categories/:id/questions` | GET | anonymous | Category questions (public projection) |
+| `/V1/faq/questions/search` | GET | anonymous | Full-text search (public projection) |
+| `/V1/faq/categories/url-key/:key/store/:id` | GET | anonymous | Category lookup by URL key |
+| `/V1/faq/questions/url-key/:key/store/:id` | GET | anonymous | Question lookup by URL key (public projection; 404 for non-public questions) |
+| `/V1/faq/questions/:id/notify` | POST | admin (`Magendoo_Faq::question_edit`) | Send answer notification email |
+| `/V1/faq/questions/:id/view` | POST | anonymous | Increment view count |
+| `/V1/faq/tags` | GET | admin (`Magendoo_Faq::question`) | List tags (SearchCriteria) |
+| `/V1/faq/tags/:id` | GET | admin (`Magendoo_Faq::question`) | Get tag |
+| `/V1/faq/tags` | POST | admin (`Magendoo_Faq::question_edit`) | Create tag |
+| `/V1/faq/tags/:id` | PUT | admin (`Magendoo_Faq::question_edit`) | Update tag |
+| `/V1/faq/tags/:id` | DELETE | admin (`Magendoo_Faq::question_delete`) | Delete tag |
+
+Notes:
+
+- **Anonymous routes return a public projection** (`PublicQuestionInterface`): title, url_key,
+  answers, position, rating counters, view count and SEO fields. They never include
+  `sender_name`, `sender_email`, `customer_id`, `status` or `visibility`.
+- **`/V1/faq/questions/submit` requires an authenticated customer.** The storefront form is
+  protected by reCAPTCHA through a frontend predispatch observer — an event REST never
+  dispatches — so an anonymous REST route would bypass the captcha entirely. Guests submit
+  through the storefront form. The submit service enforces the same rules on both entry
+  points: guest permission, e-mail validation, GDPR consent, slug sanitisation.
+- Rating identity (customer id / IP) is resolved server-side and cannot be supplied by the
+  caller.
+
+## For Developers
+
+### Service contracts
+
+```
+Api/
+├── CategoryRepositoryInterface      # Category CRUD + getByUrlKey()
+├── QuestionRepositoryInterface      # Question CRUD + getByUrlKey() (ACL-protected, full object)
+├── QuestionManagementInterface      # submit, rate, search, product/category listings,
+│                                    # getQuestionByUrlKey() (public projection), notify, views
+└── TagRepositoryInterface           # Tag CRUD
 ```
 
-### Uninstallation
+Repositories support the `SearchCriteria` pattern. Storefront-safe reads go through
+`QuestionManagementInterface` and return `Api\Data\PublicQuestionInterface`.
 
-To completely remove the module and its data:
+### Database schema (12 tables)
 
-```bash
-# Disable the module
-bin/magento module:disable Magendoo_Faq
+- `magendoo_faq_category`, `magendoo_faq_question`, `magendoo_faq_tag` — entities
+  (questions carry SEO fields, rating counters, view count and the GDPR consent record:
+  `consent_given_at` + `consent_text` snapshot)
+- `magendoo_faq_category_store`, `magendoo_faq_question_store` — store assignment
+- `magendoo_faq_category_customer_group`, `magendoo_faq_question_customer_group` — group restrictions
+- `magendoo_faq_question_category`, `magendoo_faq_question_product`, `magendoo_faq_question_tag` — M:N relations
+- `magendoo_faq_rating` — individual votes (dedup by customer id / IP, server-resolved)
+- `magendoo_faq_search_log` — one row per executed search
 
-# Remove database tables (optional - will delete all FAQ data)
-bin/magento setup:db-schema:upgrade
+`url_key` is unique on both the category and question tables.
 
-# Clean up generated files
-bin/magento setup:di:compile
-bin/magento cache:flush
+### Frontend
 
-# For Composer installations
-composer remove magendoo/module-faq
+Layout handles: `faq_index_index`, `faq_category_view`, `faq_question_view`,
+`faq_question_search`, `faq_tag_view`, plus `catalog_product_view` for the product tab.
+
+RequireJS components: `faqAskForm`, `faqRating`, `faqAutocomplete`, `faqTabDeeplink`.
+
+All storefront blocks implement `IdentityInterface`, so saving, deleting or re-publishing FAQ
+content invalidates the affected full-page-cache entries automatically. The search results
+page is deliberately non-cacheable so the search log sees repeat searches.
+
+### Admin
+
+Menu: **Content → FAQ** (FAQ Categories, FAQ Questions, FAQ Search Terms).
+
+UI components: `faq_category_listing`, `faq_category_form`, `faq_question_listing`,
+`faq_question_form`, `faq_searchlog_listing`. Mass actions: delete and change-status on both
+grids, plus change-visibility for questions.
+
+ACL (`etc/acl.xml`):
+
+```
+Magendoo_Faq::faq                       # Content → FAQ menu
+├── Magendoo_Faq::category              # Manage Categories (grid access)
+│   ├── Magendoo_Faq::category_view
+│   ├── Magendoo_Faq::category_edit
+│   └── Magendoo_Faq::category_delete
+├── Magendoo_Faq::question              # Manage Questions (grid access)
+│   ├── Magendoo_Faq::question_view
+│   ├── Magendoo_Faq::question_edit
+│   ├── Magendoo_Faq::question_delete
+│   └── Magendoo_Faq::question_approve
+└── Magendoo_Faq::search_log            # Search Terms Report
+Magendoo_Faq::config                    # System configuration section (under Stores)
 ```
 
-**⚠️ Warning:** Uninstalling will permanently delete all FAQ categories, questions, tags, ratings, and search logs. Backup your database before proceeding.
+### CMS widgets
 
-### Post-Installation Setup
+| Widget | Description |
+|--------|-------------|
+| **FAQ Questions List** (`magendoo_faq_questions_list`) | Questions, optionally filtered by category; list or accordion template |
+| **FAQ Categories List** (`magendoo_faq_categories_list`) | Category links with optional question counts |
+| **FAQ Search Box** (`magendoo_faq_search_box`) | Search form with configurable placeholder |
 
-1. **Configure Module:**
-   - Navigate to: *Stores → Configuration → Magendoo Extensions → FAQ*
-   - Set URL prefix, enable features per store view
+### SEO implementation
 
-2. **Set Permissions:**
-   - Navigate to: *System → Permissions → User Roles*
-   - Assign FAQ permissions to appropriate admin roles
+- **JSON-LD**: FAQPage schema on category and question pages, encoded with
+  `JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT` so user-supplied titles cannot break
+  out of the script block.
+- **Sitemap**: two `Magento\Sitemap\Model\ItemProvider\ItemProviderInterface` providers
+  (categories + questions), honouring per-entity `exclude_sitemap`.
+- **Canonical**: `Block\Faq\Canonical` emits `<link rel="canonical">` on the FAQ home,
+  category, question and tag pages when `seo/use_canonical` is enabled; a per-entity
+  `canonical_url` field overrides the computed URL.
+- **Robots**: per-entity noindex/nofollow, and a configurable robots meta on search results.
+- **Hreflang**: alternate links per assigned store when `seo/hreflang_enabled` is on.
 
-3. **Configure reCAPTCHA:**
-   - Navigate to: *Stores → Configuration → Security → Google reCAPTCHA Storefront*
-   - Enable for "FAQ Question Submit" form
+### Extending
 
-4. **Configure Email Templates:**
-   - Navigate to: *Marketing → Email Templates*
-   - Customize: `Admin New Question`, `Customer Answer Notification`
+```xml
+<!-- app/code/Vendor/Module/etc/di.xml -->
+<type name="Magendoo\Faq\Api\QuestionManagementInterface">
+    <plugin name="vendor_custom_question_logic"
+            type="Vendor\Module\Plugin\QuestionManagementPlugin"/>
+</type>
+```
 
-5. **Create Initial Content:**
-   - Navigate to: *Magendoo → FAQ → Categories* → Create categories
-   - Navigate to: *Magendoo → FAQ → Questions* → Create questions
+All service contracts are interfaces resolved through DI preferences, so they can be plugged
+or overridden the standard Magento way.
 
----
+### Tests and quality gates
+
+- 85 PHPUnit unit tests (`Test/Unit`, PHPUnit 12): `composer test` or
+  `vendor/bin/phpunit -c phpunit.xml.dist`
+- PHPStan (level in `phpstan.neon.dist`, pre-existing findings recorded in
+  `phpstan-baseline.neon`): `composer analyse`
+- phpcs with the Magento2 standard: `composer cs`
+- CI runs all three on PHP 8.1–8.4.
+
+## Known limitations
+
+Stated plainly so you don't have to discover them:
+
+- The **"Show Full Answer"** and **"Hide Direct URL"** checkboxes on the question form are
+  stored but not yet consumed by any storefront code — they currently have no effect.
+- The Search Terms report logs **one row per executed search**; the *Hits* column is always 1.
+  Sort by *Search Query* to gauge frequency.
+- Only an `en_US` translation ships (`i18n/en_US.csv`, all 269 phrases).
+- Anonymous REST submission is intentionally disabled (see the REST notes above).
 
 ## FAQ
 
-**Q: Can customers submit questions without creating an account?**
+**Q: Can customers submit questions without an account?**
 
-Yes, guest submissions can be enabled in configuration (`magendoo_faq/general/allow_guest_questions`). reCAPTCHA validation is recommended for anonymous submissions.
-
-**Q: Does this module work with Magento's Page Builder?**
-
-Yes, the module is compatible with Page Builder. You can link to FAQ pages or embed FAQ content using widgets (custom development may be required for specific Page Builder integrations).
+Yes — through the storefront form, when `magendoo_faq/general/allow_guest_questions` is on.
+Enable reCAPTCHA for the form to keep bots out. The REST submit route, by contrast, requires a
+logged-in customer token.
 
 **Q: Can I migrate FAQs from another platform?**
 
-Yes! Use the built-in CLI import command with a CSV file:
-```bash
-bin/magento magendoo:faq:import -e questions -f path/to/questions.csv
-bin/magento magendoo:faq:import -e categories -f path/to/categories.csv
-```
-The CSV header row must match the database column names. You can also use the REST API for programmatic imports.
-
-**Q: Is the FAQ content indexed by search engines?**
-
-Yes, the module includes:
-- SEO-friendly URLs
-- XML sitemap integration
-- JSON-LD structured data (Schema.org FAQPage)
-- Customizable meta titles and descriptions
+Yes, via `bin/magento magendoo:faq:import` with a CSV whose header row matches the database
+column names (run an export first to get a template), or via the admin REST API.
 
 **Q: Can I restrict FAQs to specific customer groups?**
 
-Yes, both categories and questions support customer group restrictions. This is ideal for B2B scenarios where you want different content for wholesale vs. retail customers.
+Yes. Both categories and questions have a Customer Groups multiselect; an empty selection means
+visible to all groups. Restrictions are enforced on listings, question pages and the anonymous
+REST reads.
 
-**Q: Does the module support multiple languages?**
+**Q: What rating modes are available?**
 
-Yes, full multi-store support allows you to create store-view-specific FAQs. Translation CSV files are included in `i18n/`.
+`yes_no` ("Was this answer helpful?"), `voting` (thumbs up/down with counts) and
+`average_rating` (a real 1–5 star input; `average_rating` stores the 0–5 mean).
 
-**Q: What rating systems are available?**
+**Q: Does the module support multiple languages/stores?**
 
-Three rating modes:
-- **Yes/No** — "Was this answer helpful?"
-- **Voting** — Thumbs up/down with vote counts
-- **Average Rating** — 5-star rating display
-
-**Q: How do I prevent spam submissions?**
-
-Enable reCAPTCHA in *Stores → Configuration → Security → Google reCAPTCHA Storefront* and select the "FAQ Question Submit" form.
-
-**Q: Can questions be associated with multiple categories?**
-
-Yes, questions support many-to-many relationships with categories for flexible organization.
-
-**Q: Is there a limit to the number of FAQs?**
-
-No hard limit. Performance depends on your server resources and database optimization.
-
-## Use Cases
-
-### Fashion E-Commerce
-- Size guide FAQs by product category
-- Care instructions linked to specific materials
-- "Ask a Question" on product pages for fit inquiries
-- Customer-submitted Q&A builds confidence in sizing
-
-### Electronics Retailer
-- Technical specifications explained per product line
-- Troubleshooting guides organized by symptom
-- Warranty and return policy FAQs
-- Product comparison questions and answers
-
-### B2B Wholesale
-- Customer group restrictions show different FAQs for retail vs. wholesale
-- Bulk ordering process documentation
-- Payment term explanations per customer segment
-- Account application Q&A
-
-### Multi-Regional Stores
-- Store-specific FAQs for shipping policies by country
-- Localized return procedures
-- Currency and payment method guides
-- Language-specific content management
-
----
-
-## Support & Extension
-
-### Extension Points
-
-Create custom plugins in `app/code/Vendor/Module/etc/di.xml`:
-
-```xml
-<!-- Extend question submission logic -->
-<type name="Magendoo\Faq\Api\QuestionManagementInterface">
-    <plugin name="vendor_custom_question_logic" 
-            type="Vendor\Module\Plugin\QuestionManagementPlugin"/>
-</type>
-
-<!-- Custom rating calculation -->
-<type name="Magendoo\Faq\Model\Question">
-    <plugin name="vendor_custom_rating" 
-            type="Vendor\Module\Plugin\QuestionPlugin"/>
-</type>
-```
-
----
+Content is assignable per store view, and hreflang tags can be enabled. UI translations
+currently ship for `en_US` only — add your own CSV under `i18n/`.
 
 ## Troubleshooting
 
-### Common Issues
+**FAQ URLs return 404** — run `bin/magento magendoo:faq:reindex` (purges and rebuilds all FAQ
+rewrites), check the URL prefix doesn't collide with a CMS page, and flush cache.
 
-#### FAQ URLs Return 404
+**Questions missing on the storefront** — the question must have status *Answered*, visibility
+*Public* (or *Logged In* while testing as a customer), a store assignment matching the current
+store view, and no excluding customer-group restriction.
 
-**Problem:** FAQ pages show "404 Not Found" error.
+**Email notifications not sent** — enable `magendoo_faq/user_notifications/enabled` (customer
+"your question was answered" mail) and/or `magendoo_faq/admin_notifications/enabled` (new
+question alert); both default to **off**. The "Save and Send Email" button reports exactly what
+happened — including "notifications are disabled".
 
-**Solutions:**
-1. Regenerate URL rewrites:
-   ```bash
-   bin/magento magendoo:faq:reindex
-   ```
-2. Check URL prefix configuration doesn't conflict with existing CMS pages
-3. Verify web server rewrite rules are enabled:
-   - Apache: `.htaccess` in root directory
-   - Nginx: `nginx.conf` sample configuration
-4. Flush Magento cache:
-   ```bash
-   bin/magento cache:flush
-   ```
-
-#### Admin Grid Not Loading
-
-**Problem:** FAQ grid shows infinite loading spinner.
-
-**Solutions:**
-1. Check browser console for JavaScript errors
-2. Verify file permissions on `var/` and `pub/` directories
-3. Check `var/log/system.log` for PHP errors
-4. Recompile static assets:
-   ```bash
-   bin/magento setup:static-content:deploy
-   ```
-
-#### Questions Not Visible on Frontend
-
-**Problem:** Questions exist in admin but don't appear on storefront.
-
-**Solutions:**
-1. Verify question status is set to **Answered**
-2. Check visibility is set to **Public** (or **Logged In** if testing as customer)
-3. Confirm store assignment in the question edit page
-4. Check customer group restrictions don't exclude current user
-5. Verify category association if viewing category-specific list
-6. Clear cache and reindex:
-   ```bash
-   bin/magento cache:flush
-   bin/magento indexer:reindex
-   ```
-
-#### Email Notifications Not Sending
-
-**Problem:** Admin or customer notifications not received.
-
-**Solutions:**
-1. Check Magento email configuration: *Stores → Configuration → Sales → Sales Emails*
-2. Verify cron is running: `bin/magento cron:run`
-3. Check email templates are configured correctly
-4. Review `var/log/exception.log` for email errors
-5. Test with a simple PHP mail script to verify server email capability
-
-#### reCAPTCHA Not Working
-
-**Problem:** "Ask Question" form submits without reCAPTCHA validation.
-
-**Solutions:**
-1. Verify reCAPTCHA keys are configured: *Stores → Configuration → Security → Google reCAPTCHA Storefront*
-2. Ensure form key `magendoo_faq_question_submit` is enabled
-3. Check JavaScript console for reCAPTCHA loading errors
-4. Verify domain is registered in Google reCAPTCHA admin console
-
-#### Product Tab Not Showing
-
-**Problem:** FAQ tab missing on product detail pages.
-
-**Solutions:**
-1. Verify module is enabled in product page config: *Stores → Configuration → Magendoo Extensions → FAQ → Product Page → Enabled*
-2. Check if questions are associated with the product
-3. Ensure layout XML is loaded (check for theme overrides)
-4. Verify tab position doesn't conflict with other tabs
-
-### Getting Help
-
-1. **Check Logs:** Review `var/log/system.log` and `var/log/exception.log`
-2. **Enable Developer Mode:** Temporarily switch to developer mode for detailed errors:
-   ```bash
-   bin/magento deploy:mode:set developer
-   ```
-3. **Contact Support:** Create an issue on GitHub for assistance
+**reCAPTCHA not validating** — configure keys and pick a type for "Enable for FAQ Ask a
+Question Form" under *Stores → Configuration → Security → Google reCAPTCHA Storefront*.
 
 ## Changelog
 
-### [1.0.0] - 2026-04-10
-
-**Initial release.** Everything below shipped in this single version; the development phases it was
-built in were never released separately.
-
-- FAQ home, category, question and tag pages behind a dedicated router, with URL rewrites
-- Product-page Q&A tab with an ask-a-question form (guest and logged-in)
-- reCAPTCHA integration via Magento's native framework
-- GDPR consent checkbox with configurable text
-- Email notifications (admin new question, customer answer)
-- Rating system
-- Social share buttons
-- Structured data JSON-LD (FAQPage schema) on question and category pages
-- Robots meta per entity, canonical fields, hreflang tags for multi-store
-- XML sitemap integration via ItemProviderInterface
-- Search with autocomplete, plus search-term logging and an admin report
-- Customer group visibility fields on frontend surfaces
-- CMS widgets — questions list (list/accordion), categories list, search box
-- CSV import/export CLI — `magendoo:faq:export`, `magendoo:faq:import`
-- Admin management for questions, categories and search terms
-- REST API — 24 endpoints
-
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-This module is licensed under the **MIT License**.
-
-See the [LICENSE](LICENSE) file, or https://opensource.org/licenses/MIT, for the full license text.
+MIT — see the [LICENSE](LICENSE) file.
 
 ## Contributing
 
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-Please ensure your code:
-- Follows PSR-12 coding standards
-- Includes proper PHPDoc comments
-- Uses strict typing (`declare(strict_types=1)`)
-- Includes unit tests where applicable
+Pull requests are welcome. Please follow the Magento2 coding standard
+(`composer cs`), keep PHPStan green against the baseline (`composer analyse`), and add unit
+tests for behaviour changes (`composer test`).
 
 ## Support & Resources
 
 - **Issue Tracker:** https://github.com/magendooro/magento2-catalog-faq-geo/issues
 - **Implementation & Customization Services:** [info@magendoo.ro](mailto:info@magendoo.ro)
-
----
-
-## Summary
-
-**Magendoo_Faq** delivers enterprise-grade FAQ management that scales from single-store boutiques to multi-store, multi-region B2B/B2C operations. With full API coverage for headless implementations, comprehensive SEO features for organic traffic growth, and deep product page integration for conversion optimization, it transforms static FAQ pages into dynamic, customer-driven knowledge platforms.
-
-**Key Differentiators:**
-- ✅ Full REST API for PWA/headless implementations
-- ✅ Product-specific Q&A to reduce purchase hesitation  
-- ✅ Advanced SEO with structured data and sitemap integration
-- ✅ Customer engagement through ratings and social sharing
-- ✅ Enterprise access control (multi-store, customer groups)
-- ✅ GDPR-compliant with native reCAPTCHA integration
-- ✅ Analytics-driven content insights
