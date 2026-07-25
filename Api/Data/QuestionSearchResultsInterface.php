@@ -12,14 +12,12 @@ declare(strict_types=1);
 
 namespace Magendoo\Faq\Api\Data;
 
-use Magento\Framework\Api\SearchResultsInterface;
-
 /**
  * Interface for FAQ question search results
  *
  * @api
  */
-interface QuestionSearchResultsInterface extends SearchResultsInterface
+interface QuestionSearchResultsInterface extends PublicQuestionSearchResultsInterface
 {
     /**
      * Get questions list

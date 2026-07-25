@@ -14,15 +14,18 @@ namespace Magendoo\Faq\Block\Faq\Tag;
 
 use Magendoo\Faq\Api\Data\TagInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Question as QuestionModel;
 use Magendoo\Faq\Model\ResourceModel\Tag\CollectionFactory as TagCollectionFactory;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magendoo\Faq\Model\Tag as TagModel;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
 /**
  * FAQ Tag Cloud Block
  */
-class Cloud extends Template
+class Cloud extends Template implements IdentityInterface
 {
     /**
      * @var TagCollectionFactory
@@ -43,6 +46,11 @@ class Cloud extends Template
      * @var array<int, int>|null
      */
     private ?array $tagCounts = null;
+
+    /**
+     * @var \Magendoo\Faq\Model\ResourceModel\Tag\Collection|null
+     */
+    private ?\Magendoo\Faq\Model\ResourceModel\Tag\Collection $tags = null;
 
     /**
      * @param Context $context
@@ -71,15 +79,40 @@ class Cloud extends Template
      */
     public function getTags(): \Magendoo\Faq\Model\ResourceModel\Tag\Collection
     {
-        $collection = $this->tagCollectionFactory->create();
-        $collection->getSelect()->join(
-            ['qt' => $collection->getTable('magendoo_faq_question_tag')],
-            'main_table.tag_id = qt.tag_id',
-            []
-        )->group('main_table.tag_id');
-        $collection->setOrder('name', 'ASC');
+        if ($this->tags === null) {
+            $collection = $this->tagCollectionFactory->create();
+            $collection->getSelect()->join(
+                ['qt' => $collection->getTable('magendoo_faq_question_tag')],
+                'main_table.tag_id = qt.tag_id',
+                []
+            )->group('main_table.tag_id');
+            $collection->setOrder('name', 'ASC');
 
-        return $collection;
+            $this->tags = $collection;
+        }
+
+        return $this->tags;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * The cloud lists tags sized by question counts, so it carries every rendered
+     * tag's identities plus both bare list tags: new tags must appear, and question
+     * saves change the counts and which tags qualify.
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $identities = [[TagModel::CACHE_TAG, QuestionModel::CACHE_TAG]];
+        foreach ($this->getTags() as $tag) {
+            if ($tag instanceof IdentityInterface) {
+                $identities[] = $tag->getIdentities();
+            }
+        }
+
+        return array_merge([], ...$identities);
     }
 
     /**

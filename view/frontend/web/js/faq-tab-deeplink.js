@@ -36,6 +36,12 @@ define([
 
             // Ensure the matching title div has the active class
             var $title = $('#tab-label-' + elId);
+
+            // Deactivate other tab titles + hide other content panels
+            $el.siblings('[data-role="content"]').each(function () {
+                $(this).hide();
+            });
+
             if ($title.length) {
                 $title.addClass('active');
                 // Also trigger the collapsible widget's activate if available
@@ -46,20 +52,18 @@ define([
                         // Widget not initialised yet — CSS fix above is enough
                     }
                 }
+
+                $title.siblings('[data-role="collapsible"]').each(function () {
+                    $(this).removeClass('active');
+                });
+
+                // Scroll the tab into view. Guarded by $title.length above:
+                // on themes with a different tab id scheme, .offset() would be
+                // undefined and this would throw inside the timeout.
+                $('html, body').animate({
+                    scrollTop: $title.offset().top - 80
+                }, 300);
             }
-
-            // Deactivate other tab titles + hide other content panels
-            $el.siblings('[data-role="content"]').each(function () {
-                $(this).hide();
-            });
-            $title.siblings('[data-role="collapsible"]').each(function () {
-                $(this).removeClass('active');
-            });
-
-            // Scroll the tab into view
-            $('html, body').animate({
-                scrollTop: $title.offset().top - 80
-            }, 300);
         }, 200);
     };
 });

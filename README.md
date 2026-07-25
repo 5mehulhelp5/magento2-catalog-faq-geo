@@ -168,7 +168,7 @@ Complete REST coverage for headless implementations:
 | `/V1/faq/tags` | GET/POST | admin | List or create tags |
 | `/V1/faq/tags/:id` | GET/PUT/DELETE | admin | Tag CRUD |
 
-**24 endpoints total — 100% test coverage via Playwright.**
+**24 endpoints total.**
 
 ### Custom URL Router
 
@@ -689,55 +689,34 @@ Create custom plugins in `app/code/Vendor/Module/etc/di.xml`:
 
 ## Changelog
 
-### [1.2.0] - 2026-04-13
-
-**Phase 3+4 Features**
-
-- FAQ CMS Widgets — Questions List (list/accordion), Categories List, Search Box
-- Tag system frontend — tag cloud, tag pages with linked questions, Router support
-- Search autocomplete — AJAX suggest endpoint + JS dropdown on FAQ home
-- CSV Import/Export CLI — `magendoo:faq:export` and `magendoo:faq:import`
-- Product tab deep-link fix — `#product_faq` hash now reliably opens the tab
-- Complete REST API — 24 endpoints with 100% test coverage
-- Tag CRUD API + URL-key lookups + view count + notification endpoints
-
-### [1.1.0] - 2026-04-12
-
-**Phase 2 + SEO Sprint**
-
-- Ask a Question form on product pages (guest + logged-in)
-- reCAPTCHA integration via Magento's native framework
-- GDPR consent checkbox with configurable text
-- Email notifications (admin new question + customer answer)
-- Rating system — 3 modes (Yes/No, Voting, Average Stars)
-- Social share buttons (Facebook, Twitter, LinkedIn, Pinterest, Email)
-- Structured data JSON-LD (FAQPage schema) on question + category pages
-- Robots meta per entity (noindex/nofollow from DB fields)
-- XML Sitemap integration via ItemProviderInterface
-- Search terms logging + admin report
-- Hreflang tags for multi-store SEO
-- Customer group visibility filtering on all frontend surfaces
-- Product/category assignment in admin question form
-
 ### [1.0.0] - 2026-04-10
 
-**Initial Release (Phase 1 MVP)**
+**Initial release.** Everything below shipped in this single version; the development phases it was
+built in were never released separately.
 
-- 12 database tables with declarative schema
-- FAQ category + question + tag management (admin CRUD)
-- Product page FAQ tab integration
-- Custom URL router with SEO-friendly paths
-- Full-text search with pagination
-- REST API (category + question CRUD)
-- ACL permissions, admin menu, system configuration
-- URL rewrite generation + CLI reindex command
-- Multi-store support via junction tables
+- FAQ home, category, question and tag pages behind a dedicated router, with URL rewrites
+- Product-page Q&A tab with an ask-a-question form (guest and logged-in)
+- reCAPTCHA integration via Magento's native framework
+- GDPR consent checkbox with configurable text
+- Email notifications (admin new question, customer answer)
+- Rating system
+- Social share buttons
+- Structured data JSON-LD (FAQPage schema) on question and category pages
+- Robots meta per entity, canonical fields, hreflang tags for multi-store
+- XML sitemap integration via ItemProviderInterface
+- Search with autocomplete, plus search-term logging and an admin report
+- Customer group visibility fields on frontend surfaces
+- CMS widgets — questions list (list/accordion), categories list, search box
+- CSV import/export CLI — `magendoo:faq:export`, `magendoo:faq:import`
+- Admin management for questions, categories and search terms
+- REST API — 24 endpoints
+
 
 ## License
 
 This module is licensed under the **MIT License**.
 
-See https://opensource.org/licenses/OSL-3.0 for the full license text.
+See the [LICENSE](LICENSE) file, or https://opensource.org/licenses/MIT, for the full license text.
 
 ## Contributing
 

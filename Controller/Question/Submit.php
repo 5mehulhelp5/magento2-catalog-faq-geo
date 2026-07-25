@@ -23,11 +23,15 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Filter\FilterManager;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
 
 /**
  * Submit a new question from frontend
+ *
+ * Thin HTTP adapter around QuestionManagementInterface::submitQuestion(): all
+ * field validation, the guest-submission gate, the GDPR consent check, identity
+ * resolution and slug generation live in the service so the storefront form and
+ * the web API route enforce the same rules.
  */
 class Submit implements HttpPostActionInterface
 {
@@ -72,11 +76,6 @@ class Submit implements HttpPostActionInterface
     protected FaqHelper $faqHelper;
 
     /**
-     * @var FilterManager
-     */
-    protected FilterManager $filterManager;
-
-    /**
      * @param RequestInterface $request
      * @param ResultFactory $resultFactory
      * @param FormKeyValidator $formKeyValidator
@@ -85,7 +84,6 @@ class Submit implements HttpPostActionInterface
      * @param QuestionManagementInterface $questionManagement
      * @param CustomerSession $customerSession
      * @param FaqHelper $faqHelper
-     * @param FilterManager $filterManager
      */
     public function __construct(
         RequestInterface $request,
@@ -95,8 +93,7 @@ class Submit implements HttpPostActionInterface
         QuestionInterfaceFactory $questionFactory,
         QuestionManagementInterface $questionManagement,
         CustomerSession $customerSession,
-        FaqHelper $faqHelper,
-        FilterManager $filterManager
+        FaqHelper $faqHelper
     ) {
         $this->request = $request;
         $this->resultFactory = $resultFactory;
@@ -106,7 +103,6 @@ class Submit implements HttpPostActionInterface
         $this->questionManagement = $questionManagement;
         $this->customerSession = $customerSession;
         $this->faqHelper = $faqHelper;
-        $this->filterManager = $filterManager;
     }
 
     /**
@@ -130,61 +126,32 @@ class Submit implements HttpPostActionInterface
             return $resultRedirect->setRefererUrl();
         }
 
-        // Check if guest questions are allowed
+        // The service enforces the guest-submission setting too; this check only
+        // exists to give guests a redirect to the login page instead of an error.
         if (!$this->customerSession->isLoggedIn() && !$this->faqHelper->isGuestQuestionAllowed()) {
             $this->messageManager->addErrorMessage(__('Please log in to submit a question.'));
             return $resultRedirect->setPath('customer/account/login');
         }
 
-        $senderName = trim((string) $this->request->getParam('sender_name'));
-        $senderEmail = trim((string) $this->request->getParam('sender_email'));
-        $title = trim((string) $this->request->getParam('title'));
         $productIdParam = $this->request->getParam('product_id');
         $productId = $productIdParam !== null && $productIdParam !== '' ? (int) $productIdParam : null;
-
-        // Validate required fields
-        if ($senderName === '' || $senderEmail === '' || $title === '') {
-            $this->messageManager->addErrorMessage(__('Please fill in all required fields.'));
-            return $resultRedirect->setRefererUrl();
-        }
-
-        // Validate email
-        if (!filter_var($senderEmail, FILTER_VALIDATE_EMAIL)) {
-            $this->messageManager->addErrorMessage(__('Please enter a valid email address.'));
-            return $resultRedirect->setRefererUrl();
-        }
-
-        // GDPR consent enforcement
-        if ($this->faqHelper->isGdprEnabled()) {
-            $consent = $this->request->getParam('gdpr_consent');
-            if (!$consent) {
-                $this->messageManager->addErrorMessage(
-                    __('You must agree to the privacy policy before submitting your question.')
-                );
-                return $resultRedirect->setRefererUrl();
-            }
-        }
 
         try {
             /** @var QuestionInterface $question */
             $question = $this->questionFactory->create();
-            $question->setTitle($title);
-            $question->setUrlKey($this->generateUrlKey($title));
-            $question->setStatus(QuestionInterface::STATUS_PENDING);
-            $question->setVisibility(QuestionInterface::VISIBILITY_NONE);
-            $question->setSenderName($senderName);
-            $question->setSenderEmail($senderEmail);
-
-            if ($this->customerSession->isLoggedIn()) {
-                $question->setCustomerId((int) $this->customerSession->getCustomerId());
-            }
+            $question->setTitle(trim((string) $this->request->getParam('title')));
+            $question->setSenderName(trim((string) $this->request->getParam('sender_name')));
+            $question->setSenderEmail(trim((string) $this->request->getParam('sender_email')));
 
             // Link product if provided — handled by ResourceModel\Question::saveProductRelation on save
             if ($productId !== null && $productId > 0) {
                 $question->setData('product_ids', [$productId]);
             }
 
-            $this->questionManagement->submitQuestion($question);
+            $this->questionManagement->submitQuestion(
+                $question,
+                (bool) $this->request->getParam('gdpr_consent')
+            );
 
             $this->messageManager->addSuccessMessage(
                 __('Your question has been submitted and will be reviewed by our team.')
@@ -199,41 +166,9 @@ class Submit implements HttpPostActionInterface
             return $resultRedirect->setRefererUrl();
         }
 
-        // Redirect back to the referring page or FAQ index on success
-        $referer = (string) $this->request->getServer('HTTP_REFERER');
-        if ($referer !== '') {
-            return $resultRedirect->setUrl($referer);
-        }
-
-        return $resultRedirect->setPath('faq');
-    }
-
-    /**
-     * Generate a URL key slug from a title.
-     *
-     * @param string $title
-     * @return string
-     */
-    private function generateUrlKey(string $title): string
-    {
-        $slug = $this->filterManager->translitUrl($title);
-        $slug = strtolower($slug);
-        $slug = preg_replace('#[^a-z0-9]+#', '-', $slug);
-        $slug = trim((string) $slug, '-');
-
-        if ($slug === '') {
-            $slug = 'question';
-        }
-
-        // Append uniqueness suffix to avoid collisions on pending/auto-generated keys.
-        $slug .= '-' . substr((string) uniqid('', true), -6);
-
-        // Keep the url_key length sane.
-        if (strlen($slug) > 128) {
-            $slug = substr($slug, 0, 128);
-            $slug = rtrim($slug, '-');
-        }
-
-        return $slug;
+        // Redirect back to the referring page on success. setRefererUrl() routes
+        // through the validated referer (internal URLs only, base URL fallback),
+        // matching the error branches above.
+        return $resultRedirect->setRefererUrl();
     }
 }

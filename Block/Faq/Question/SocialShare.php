@@ -14,6 +14,7 @@ namespace Magendoo\Faq\Block\Faq\Question;
 
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Url\EncoderInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -23,7 +24,7 @@ use Magento\Framework\View\Element\Template\Context;
  *
  * Renders social share buttons for the current FAQ question.
  */
-class SocialShare extends Template
+class SocialShare extends Template implements IdentityInterface
 {
     /**
      * Supported network identifiers.
@@ -104,6 +105,21 @@ class SocialShare extends Template
         }
 
         return null;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * The share links carry the question's title and URL, so the block shares the
+     * question's identities.
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $question = $this->getQuestion();
+
+        return $question instanceof IdentityInterface ? $question->getIdentities() : [];
     }
 
     /**

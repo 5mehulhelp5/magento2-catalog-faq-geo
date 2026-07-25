@@ -10,7 +10,7 @@
 var config = {
     map: {
         '*': {
-            faqSearch: 'Magendoo_Faq/js/faq-search',
+            faqAskForm: 'Magendoo_Faq/js/faq-ask-form',
             faqRating: 'Magendoo_Faq/js/faq-rating',
             faqAutocomplete: 'Magendoo_Faq/js/faq-autocomplete',
             faqTabDeeplink: 'Magendoo_Faq/js/faq-tab-deeplink'

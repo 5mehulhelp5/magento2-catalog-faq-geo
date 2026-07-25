@@ -15,10 +15,13 @@ namespace Magendoo\Faq\Block\Widget;
 use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Category as CategoryModel;
+use Magendoo\Faq\Model\Question as QuestionModel;
 use Magendoo\Faq\Model\ResourceModel\Category\Collection;
 use Magendoo\Faq\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
@@ -27,7 +30,7 @@ use Magento\Widget\Block\BlockInterface;
 /**
  * FAQ Categories List Widget
  */
-class CategoriesList extends Template implements BlockInterface
+class CategoriesList extends Template implements BlockInterface, IdentityInterface
 {
     /**
      * @var CategoryCollectionFactory
@@ -53,6 +56,11 @@ class CategoriesList extends Template implements BlockInterface
      * @var CustomerSession
      */
     private CustomerSession $customerSession;
+
+    /**
+     * @var Collection|null
+     */
+    private ?Collection $categories = null;
 
     /**
      * @param Context $context
@@ -87,18 +95,47 @@ class CategoriesList extends Template implements BlockInterface
      */
     public function getCategories(): Collection
     {
-        $collection = $this->categoryCollectionFactory->create();
-        $collection->addActiveFilter();
+        if ($this->categories === null) {
+            $collection = $this->categoryCollectionFactory->create();
+            $collection->addActiveFilter();
 
-        $storeId = (int) $this->storeManager->getStore()->getId();
-        $collection->addStoreFilter($storeId);
-        $collection->addCustomerGroupVisibilityFilter(
-            (int) $this->customerSession->getCustomerGroupId()
-        );
+            $storeId = (int) $this->storeManager->getStore()->getId();
+            $collection->addStoreFilter($storeId);
+            $collection->addCustomerGroupVisibilityFilter(
+                (int) $this->customerSession->getCustomerGroupId()
+            );
 
-        $collection->setOrder('position', 'ASC');
+            $collection->setOrder('position', 'ASC');
 
-        return $collection;
+            $this->categories = $collection;
+        }
+
+        return $this->categories;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * Union of the rendered categories' identities plus the bare category list tag;
+     * when question counts are shown the bare question list tag is added too, since
+     * any question save can change the displayed numbers.
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $identities = [[CategoryModel::CACHE_TAG]];
+        if ($this->showQuestionCount()) {
+            $identities[] = [QuestionModel::CACHE_TAG];
+        }
+
+        foreach ($this->getCategories() as $category) {
+            if ($category instanceof IdentityInterface) {
+                $identities[] = $category->getIdentities();
+            }
+        }
+
+        return array_merge([], ...$identities);
     }
 
     /**
