@@ -17,6 +17,8 @@ use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Api\QuestionRepositoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Question as QuestionModel;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -24,7 +26,7 @@ use Magento\Framework\View\Element\Template\Context;
 /**
  * FAQ Question View Block
  */
-class View extends Template
+class View extends Template implements IdentityInterface
 {
     /**
      * @var QuestionRepositoryInterface
@@ -113,6 +115,35 @@ class View extends Template
         }
 
         return $this->category;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * The page renders the question plus (for breadcrumbs) its category, so both
+     * entities' identities are stamped; the bare question tag is the fallback when
+     * nothing could be loaded, mirroring
+     * \Magento\CatalogWidget\Block\Product\ProductsList::getIdentities().
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $identities = [];
+
+        $question = $this->getQuestion();
+        if ($question instanceof IdentityInterface) {
+            $identities[] = $question->getIdentities();
+        }
+
+        $category = $this->getCategory();
+        if ($category instanceof IdentityInterface) {
+            $identities[] = $category->getIdentities();
+        }
+
+        $identities = array_merge([], ...$identities);
+
+        return $identities ?: [QuestionModel::CACHE_TAG];
     }
 
     /**

@@ -128,9 +128,12 @@
         </resources>
     </route>
 
-    <!-- Question URL-key lookup (headless/PWA) -->
+    <!-- Question URL-key lookup (headless/PWA).
+         Served by the management service, not the repository: the service
+         enforces the visibility predicate and returns the storefront-safe
+         PublicQuestion projection (no sender name/email, no customer id). -->
     <route url="/V1/faq/questions/url-key/:urlKey/store/:storeId" method="GET">
-        <service class="Magendoo\Faq\Api\QuestionRepositoryInterface" method="getByUrlKey"/>
+        <service class="Magendoo\Faq\Api\QuestionManagementInterface" method="getQuestionByUrlKey"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>

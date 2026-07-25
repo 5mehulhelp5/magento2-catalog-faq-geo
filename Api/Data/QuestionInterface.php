@@ -17,9 +17,13 @@ use Magento\Framework\Api\ExtensibleDataInterface;
 /**
  * FAQ Question Interface
  *
+ * Extends the storefront-safe PublicQuestionInterface with the moderation and
+ * submitter fields (status, visibility, sender name/email, customer id) that
+ * are only serialised on ACL-protected routes.
+ *
  * @api
  */
-interface QuestionInterface extends ExtensibleDataInterface
+interface QuestionInterface extends PublicQuestionInterface, ExtensibleDataInterface
 {
     /** Status constants */
     public const STATUS_PENDING = 'pending';
@@ -59,26 +63,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public const UPDATED_AT = 'updated_at';
 
     /**
-     * Get question ID
-     *
-     * @return int|null
-     */
-    public function getQuestionId(): ?int;
-
-    /**
      * Set question ID
      *
      * @param int $questionId
      * @return $this
      */
     public function setQuestionId(int $questionId): static;
-
-    /**
-     * Get title
-     *
-     * @return string
-     */
-    public function getTitle(): string;
 
     /**
      * Set title
@@ -89,13 +79,6 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setTitle(string $title): static;
 
     /**
-     * Get URL key
-     *
-     * @return string|null
-     */
-    public function getUrlKey(): ?string;
-
-    /**
      * Set URL key
      *
      * @param string|null $urlKey
@@ -104,26 +87,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setUrlKey(?string $urlKey): static;
 
     /**
-     * Get short answer
-     *
-     * @return string|null
-     */
-    public function getShortAnswer(): ?string;
-
-    /**
      * Set short answer
      *
      * @param string|null $shortAnswer
      * @return $this
      */
     public function setShortAnswer(?string $shortAnswer): static;
-
-    /**
-     * Get full answer
-     *
-     * @return string|null
-     */
-    public function getFullAnswer(): ?string;
 
     /**
      * Set full answer
@@ -164,26 +133,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setVisibility(string $visibility): static;
 
     /**
-     * Get position
-     *
-     * @return int
-     */
-    public function getPosition(): int;
-
-    /**
      * Set position
      *
      * @param int $position
      * @return $this
      */
     public function setPosition(int $position): static;
-
-    /**
-     * Get is show full answer
-     *
-     * @return bool
-     */
-    public function getIsShowFullAnswer(): bool;
 
     /**
      * Set is show full answer
@@ -239,26 +194,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setCustomerId(?int $customerId): static;
 
     /**
-     * Get positive rating
-     *
-     * @return int
-     */
-    public function getPositiveRating(): int;
-
-    /**
      * Set positive rating
      *
      * @param int $positiveRating
      * @return $this
      */
     public function setPositiveRating(int $positiveRating): static;
-
-    /**
-     * Get negative rating
-     *
-     * @return int
-     */
-    public function getNegativeRating(): int;
 
     /**
      * Set negative rating
@@ -269,26 +210,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setNegativeRating(int $negativeRating): static;
 
     /**
-     * Get average rating
-     *
-     * @return float
-     */
-    public function getAverageRating(): float;
-
-    /**
      * Set average rating
      *
      * @param float $averageRating
      * @return $this
      */
     public function setAverageRating(float $averageRating): static;
-
-    /**
-     * Get view count
-     *
-     * @return int
-     */
-    public function getViewCount(): int;
 
     /**
      * Set view count
@@ -299,26 +226,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setViewCount(int $viewCount): static;
 
     /**
-     * Get meta title
-     *
-     * @return string|null
-     */
-    public function getMetaTitle(): ?string;
-
-    /**
      * Set meta title
      *
      * @param string|null $metaTitle
      * @return $this
      */
     public function setMetaTitle(?string $metaTitle): static;
-
-    /**
-     * Get meta description
-     *
-     * @return string|null
-     */
-    public function getMetaDescription(): ?string;
 
     /**
      * Set meta description
@@ -329,13 +242,6 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setMetaDescription(?string $metaDescription): static;
 
     /**
-     * Get noindex
-     *
-     * @return bool
-     */
-    public function getNoindex(): bool;
-
-    /**
      * Set noindex
      *
      * @param bool $noindex
@@ -344,26 +250,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setNoindex(bool $noindex): static;
 
     /**
-     * Get nofollow
-     *
-     * @return bool
-     */
-    public function getNofollow(): bool;
-
-    /**
      * Set nofollow
      *
      * @param bool $nofollow
      * @return $this
      */
     public function setNofollow(bool $nofollow): static;
-
-    /**
-     * Get canonical URL
-     *
-     * @return string|null
-     */
-    public function getCanonicalUrl(): ?string;
 
     /**
      * Set canonical URL
@@ -404,26 +296,12 @@ interface QuestionInterface extends ExtensibleDataInterface
     public function setHideDirectUrl(bool $hideDirectUrl): static;
 
     /**
-     * Get created at
-     *
-     * @return string|null
-     */
-    public function getCreatedAt(): ?string;
-
-    /**
      * Set created at
      *
      * @param string|null $createdAt
      * @return $this
      */
     public function setCreatedAt(?string $createdAt): static;
-
-    /**
-     * Get updated at
-     *
-     * @return string|null
-     */
-    public function getUpdatedAt(): ?string;
 
     /**
      * Set updated at
@@ -446,5 +324,7 @@ interface QuestionInterface extends ExtensibleDataInterface
      * @param \Magendoo\Faq\Api\Data\QuestionExtensionInterface $extensionAttributes
      * @return $this
      */
-    public function setExtensionAttributes(\Magendoo\Faq\Api\Data\QuestionExtensionInterface $extensionAttributes): static;
+    public function setExtensionAttributes(
+        \Magendoo\Faq\Api\Data\QuestionExtensionInterface $extensionAttributes
+    ): static;
 }

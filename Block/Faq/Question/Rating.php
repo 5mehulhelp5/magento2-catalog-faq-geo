@@ -14,6 +14,7 @@ namespace Magendoo\Faq\Block\Faq\Question;
 
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
@@ -25,7 +26,7 @@ use Magento\Framework\View\Element\Template\Context;
  *  - voting:         thumbs-up / thumbs-down voting buttons
  *  - average_rating: 5-star average rating display
  */
-class Rating extends Template
+class Rating extends Template implements IdentityInterface
 {
     /**
      * Rating type identifiers.
@@ -142,6 +143,21 @@ class Rating extends Template
         $question = $this->getQuestion();
 
         return $question ? (float) $question->getAverageRating() : 0.0;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * The rendered vote counts / average belong to the question, so its identities
+     * make sure the cached page is purged when a vote changes the numbers.
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $question = $this->getQuestion();
+
+        return $question instanceof IdentityInterface ? $question->getIdentities() : [];
     }
 
     /**

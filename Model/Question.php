@@ -50,7 +50,25 @@ class Question extends AbstractExtensibleModel implements QuestionInterface, Ide
      */
     public function getIdentities(): array
     {
-        return [self::CACHE_TAG . '_' . $this->getId()];
+        $identities = [self::CACHE_TAG . '_' . $this->getId()];
+
+        // Listing pages are tagged with the bare CACHE_TAG so that a NEW entity, a deleted one,
+        // or one whose status, visibility or position changed shows up (or disappears) without waiting for the
+        // page cache to expire. Without this, only pages already rendering this exact entity
+        // would ever be purged, and a newly published entity would stay invisible.
+        // Mirrors Magento\Catalog\Model\Category::getIdentities().
+        if ($this->isObjectNew() || $this->isDeleted()) {
+            $identities[] = self::CACHE_TAG;
+        } else {
+            foreach (['status', 'visibility', 'position'] as $field) {
+                if ($this->dataHasChangedFor($field)) {
+                    $identities[] = self::CACHE_TAG;
+                    break;
+                }
+            }
+        }
+
+        return array_unique($identities);
     }
 
     /**

@@ -62,7 +62,7 @@ class Data extends AbstractHelper
 
     /** GDPR config paths */
     private const XML_PATH_GDPR_ENABLED = 'magendoo_faq/gdpr/enabled';
-    private const XML_PATH_GDPR_TEXT = 'magendoo_faq/gdpr/text';
+    private const XML_PATH_GDPR_TEXT = 'magendoo_faq/gdpr/consent_text';
 
     /**
      * @var StoreManagerInterface

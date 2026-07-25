@@ -7,7 +7,10 @@
  * @license   https://opensource.org/licenses/OSL-3.0 Open Software License v. 3.0 (OSL-3.0)
  */
 
-define(['jquery'], function ($) {
+define([
+    'jquery',
+    'mage/cookies'
+], function ($) {
     'use strict';
 
     return function (config, element) {
@@ -34,7 +37,7 @@ define(['jquery'], function ($) {
                 data: {
                     question_id: questionId,
                     vote_type: vote,
-                    form_key: window.FORM_KEY
+                    form_key: $.mage.cookies.get('form_key')
                 }
             }).done(function (response) {
                 if (response && response.success) {

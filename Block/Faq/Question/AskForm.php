@@ -13,23 +13,27 @@ declare(strict_types=1);
 namespace Magendoo\Faq\Block\Faq\Question;
 
 use Magendoo\Faq\Helper\Data as FaqHelper;
-use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\Data\Form\FormKey;
 use Magento\Framework\Registry;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
 /**
  * Ask a Question form block
+ *
+ * The form is always rendered server-side. Login gating and customer prefill
+ * happen in the browser (Magendoo_Faq/js/faq-ask-form) from the `customer`
+ * customer-data section: on cacheable pages core's DepersonalizePlugin
+ * (vendor/magento/module-customer/Model/Layout/DepersonalizePlugin.php) clears
+ * the customer session before any block renders, so a server-side
+ * CustomerSession::isLoggedIn() check is always false and whatever it decides
+ * gets baked into the page cache for every visitor of the same cache variant.
+ * The submit controller still enforces the guest policy server-side on the
+ * non-cacheable POST.
  */
 class AskForm extends Template
 {
-    /**
-     * @var CustomerSession
-     */
-    private CustomerSession $customerSession;
-
     /**
      * @var FaqHelper
      */
@@ -46,33 +50,30 @@ class AskForm extends Template
     private Registry $registry;
 
     /**
-     * @var FormKey
+     * @var Json
      */
-    private FormKey $formKey;
+    private Json $jsonSerializer;
 
     /**
      * @param Context $context
-     * @param CustomerSession $customerSession
      * @param FaqHelper $helper
      * @param ProductMetadataInterface $productMetadata
      * @param Registry $registry
-     * @param FormKey $formKey
+     * @param Json $jsonSerializer
      * @param array<string, mixed> $data
      */
     public function __construct(
         Context $context,
-        CustomerSession $customerSession,
         FaqHelper $helper,
         ProductMetadataInterface $productMetadata,
         Registry $registry,
-        FormKey $formKey,
+        Json $jsonSerializer,
         array $data = []
     ) {
-        $this->customerSession = $customerSession;
         $this->helper = $helper;
         $this->productMetadata = $productMetadata;
         $this->registry = $registry;
-        $this->formKey = $formKey;
+        $this->jsonSerializer = $jsonSerializer;
         parent::__construct($context, $data);
     }
 
@@ -87,55 +88,44 @@ class AskForm extends Template
     }
 
     /**
-     * Check if the current customer is logged in.
-     *
-     * @return bool
-     */
-    public function isLoggedIn(): bool
-    {
-        return $this->customerSession->isLoggedIn();
-    }
-
-    /**
      * Whether the form should be rendered for the current visitor.
+     *
+     * Always true: the visitor-specific decision must not be made while
+     * rendering a cacheable page (see the class comment), so the markup is
+     * always emitted and the client-side component shows either the form or
+     * the login notice.
      *
      * @return bool
      */
     public function canShowForm(): bool
     {
-        return $this->isLoggedIn() || $this->isGuestAllowed();
+        return true;
     }
 
     /**
      * Get the full name of the logged in customer, empty string otherwise.
      *
+     * Always empty: the customer session is depersonalized during rendering,
+     * so the prefill is done client-side from the customer-data section. Kept
+     * because the template renders it as the field's initial value.
+     *
      * @return string
      */
     public function getLoggedInCustomerName(): string
     {
-        if (!$this->isLoggedIn()) {
-            return '';
-        }
-
-        $customer = $this->customerSession->getCustomer();
-        $firstName = (string) $customer->getFirstname();
-        $lastName = (string) $customer->getLastname();
-
-        return trim($firstName . ' ' . $lastName);
+        return '';
     }
 
     /**
      * Get the email of the logged in customer, empty string otherwise.
      *
+     * Always empty — see getLoggedInCustomerName().
+     *
      * @return string
      */
     public function getLoggedInCustomerEmail(): string
     {
-        if (!$this->isLoggedIn()) {
-            return '';
-        }
-
-        return (string) $this->customerSession->getCustomer()->getEmail();
+        return '';
     }
 
     /**
@@ -161,16 +151,6 @@ class AskForm extends Template
     public function getSubmitUrl(): string
     {
         return $this->getUrl('faq/question/submit');
-    }
-
-    /**
-     * Get the current form key.
-     *
-     * @return string
-     */
-    public function getFormKey(): string
-    {
-        return (string) $this->formKey->getFormKey();
     }
 
     /**
@@ -211,5 +191,32 @@ class AskForm extends Template
     public function getMagentoVersion(): string
     {
         return $this->productMetadata->getVersion();
+    }
+
+    /**
+     * Append the client-side gating/prefill initializer to the rendered form.
+     *
+     * @param string $html
+     * @return string
+     */
+    protected function _afterToHtml($html)
+    {
+        if (trim((string) $html) === '') {
+            return $html;
+        }
+
+        $config = [
+            '#faq-ask-form' => [
+                'faqAskForm' => [
+                    'allowGuest' => $this->isGuestAllowed(),
+                    'loginUrl' => $this->getLoginUrl(),
+                ],
+            ],
+        ];
+
+        return $html
+            . '<script type="text/x-magento-init">'
+            . $this->jsonSerializer->serialize($config)
+            . '</script>';
     }
 }

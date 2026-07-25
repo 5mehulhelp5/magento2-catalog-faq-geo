@@ -14,17 +14,24 @@ namespace Magendoo\Faq\Block\Product;
 
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Question as QuestionModel;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * FAQ Product Questions Tab Block
  */
-class Questions extends Template
+class Questions extends Template implements IdentityInterface
 {
+    /**
+     * Config path of the tab position; mirrored privately in Helper\Data without a getter.
+     */
+    private const XML_PATH_PRODUCT_TAB_POSITION = 'magendoo_faq/product_page/tab_position';
     /**
      * @var QuestionCollectionFactory
      */
@@ -71,6 +78,38 @@ class Questions extends Template
         $this->registry = $registry;
         $this->customerSession = $customerSession;
         parent::__construct($context, $data);
+    }
+
+    /**
+     * Stamp the configured tab title and position onto block data.
+     *
+     * Luma never calls a block's getter for these: details.phtml reads
+     * getChildData($alias, 'title') and the tab order comes from
+     * getChildData($alias, 'sort_order')
+     * (vendor/magento/module-catalog/Block/Product/View/Details.php:32-49), both of
+     * which resolve to this block's data. The static layout arguments in
+     * catalog_product_view.xml only provide the fallback, so the admin-configured
+     * values (including the {count} placeholder) must be set as data before the
+     * parent renders.
+     *
+     * @return $this
+     */
+    protected function _prepareLayout()
+    {
+        $tabName = $this->helper->getProductTabName();
+        if ($tabName !== '') {
+            $this->setData('title', $this->getTabTitle());
+        }
+
+        $tabPosition = $this->_scopeConfig->getValue(
+            self::XML_PATH_PRODUCT_TAB_POSITION,
+            ScopeInterface::SCOPE_STORE
+        );
+        if ($tabPosition !== null && $tabPosition !== '') {
+            $this->setData('sort_order', (string) (int) $tabPosition);
+        }
+
+        return parent::_prepareLayout();
     }
 
     /**
@@ -151,12 +190,23 @@ class Questions extends Template
     }
 
     /**
-     * Get title for product.info.details tab label
+     * Return identifiers for produced content
      *
-     * @return string
+     * Union of the rendered questions' identities plus the bare question list tag,
+     * so a newly published question for this product (and the {count} in the tab
+     * title) appears without a manual cache flush.
+     *
+     * @return string[]
      */
-    public function getTitle(): string
+    public function getIdentities(): array
     {
-        return $this->getTabTitle();
+        $identities = [[QuestionModel::CACHE_TAG]];
+        foreach ($this->getQuestions() as $question) {
+            if ($question instanceof IdentityInterface) {
+                $identities[] = $question->getIdentities();
+            }
+        }
+
+        return array_merge([], ...$identities);
     }
 }

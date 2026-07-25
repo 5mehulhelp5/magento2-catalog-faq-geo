@@ -12,19 +12,19 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       layout="1column"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <head>
-        <css src="Magendoo_Faq::css/source/_module.less"/>
-    </head>
     <body>
         <referenceBlock name="breadcrumbs">
             <!-- breadcrumbs handled by controller -->
         </referenceBlock>
         <referenceContainer name="content">
-            <block class="Magendoo\Faq\Block\Faq\Home" name="faq.home" template="Magendoo_Faq::home.phtml">
-                <arguments>
-                    <argument name="cache_lifetime" xsi:type="number">3600</argument>
-                </arguments>
-            </block>
+            <!--
+              No cache_lifetime here: the page is already full-page cached, and a
+              block_html entry would be keyed without the customer group
+              (Template::getCacheKeyInfo()) while the block renders group-filtered
+              content — one group's categories would leak into every other group's
+              first page render.
+            -->
+            <block class="Magendoo\Faq\Block\Faq\Home" name="faq.home" template="Magendoo_Faq::home.phtml"/>
         </referenceContainer>
         <referenceContainer name="head.additional">
             <block class="Magendoo\Faq\Block\Faq\Hreflang" name="faq.home.hreflang"

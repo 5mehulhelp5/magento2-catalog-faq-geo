@@ -31,14 +31,15 @@ define(['jquery'], function ($) {
                         return;
                     }
 
-                    var html = '';
-
+                    $dropdown.empty();
                     data.forEach(function (item) {
-                        html += '<a href="' + item.url + '" class="faq-suggest-item">' +
-                            $('<span>').text(item.title).html() +
-                            '</a>';
+                        $('<a></a>')
+                            .addClass('faq-suggest-item')
+                            .attr('href', item.url)
+                            .text(item.title)
+                            .appendTo($dropdown);
                     });
-                    $dropdown.html(html).show();
+                    $dropdown.show();
                 });
             }, 300);
         });

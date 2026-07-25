@@ -16,8 +16,10 @@ use Magendoo\Faq\Api\CategoryRepositoryInterface;
 use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Question as QuestionModel;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -25,7 +27,7 @@ use Magento\Framework\View\Element\Template\Context;
 /**
  * FAQ Category View Block
  */
-class View extends Template
+class View extends Template implements IdentityInterface
 {
     /**
      * @var QuestionCollectionFactory
@@ -51,6 +53,11 @@ class View extends Template
      * @var CategoryInterface|null
      */
     private ?CategoryInterface $category = null;
+
+    /**
+     * @var \Magendoo\Faq\Model\ResourceModel\Question\Collection|null
+     */
+    private ?\Magendoo\Faq\Model\ResourceModel\Question\Collection $questions = null;
 
     /**
      * @param Context $context
@@ -103,34 +110,64 @@ class View extends Template
      */
     public function getQuestions(): \Magendoo\Faq\Model\ResourceModel\Question\Collection
     {
-        $collection = $this->questionCollectionFactory->create();
-        $collection->addFieldToFilter('visibility', QuestionInterface::VISIBILITY_PUBLIC);
-        $collection->addFieldToFilter('status', QuestionInterface::STATUS_ANSWERED);
+        if ($this->questions === null) {
+            $collection = $this->questionCollectionFactory->create();
+            $collection->addFieldToFilter('visibility', QuestionInterface::VISIBILITY_PUBLIC);
+            $collection->addFieldToFilter('status', QuestionInterface::STATUS_ANSWERED);
+
+            $category = $this->getCategory();
+            if ($category) {
+                $collection->addCategoryFilter((int) $category->getCategoryId());
+            }
+
+            $storeId = (int) $this->_storeManager->getStore()->getId();
+            $collection->addStoreFilter($storeId);
+            $collection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
+
+            $sortBy = $this->helper->getSortQuestionsBy();
+            if ($sortBy === 'name' || $sortBy === 'title') {
+                $collection->setOrder('title', 'ASC');
+            } else {
+                $collection->setOrder('position', 'ASC');
+            }
+
+            $pageSize = $this->helper->getQuestionsPerCategoryPage();
+            if ($pageSize > 0) {
+                $collection->setPageSize($pageSize);
+                $currentPage = (int) $this->getRequest()->getParam('p', 1);
+                $collection->setCurPage($currentPage);
+            }
+
+            $this->questions = $collection;
+        }
+
+        return $this->questions;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * Union of the rendered category's and questions' identities plus the bare
+     * question list tag, so newly published questions show up in the cached page.
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $identities = [[QuestionModel::CACHE_TAG]];
 
         $category = $this->getCategory();
-        if ($category) {
-            $collection->addCategoryFilter((int) $category->getCategoryId());
+        if ($category instanceof IdentityInterface) {
+            $identities[] = $category->getIdentities();
         }
 
-        $storeId = (int) $this->_storeManager->getStore()->getId();
-        $collection->addStoreFilter($storeId);
-        $collection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
-
-        $sortBy = $this->helper->getSortQuestionsBy();
-        if ($sortBy === 'name' || $sortBy === 'title') {
-            $collection->setOrder('title', 'ASC');
-        } else {
-            $collection->setOrder('position', 'ASC');
+        foreach ($this->getQuestions() as $question) {
+            if ($question instanceof IdentityInterface) {
+                $identities[] = $question->getIdentities();
+            }
         }
 
-        $pageSize = $this->helper->getQuestionsPerCategoryPage();
-        if ($pageSize > 0) {
-            $collection->setPageSize($pageSize);
-            $currentPage = (int) $this->getRequest()->getParam('p', 1);
-            $collection->setCurPage($currentPage);
-        }
-
-        return $collection;
+        return array_merge([], ...$identities);
     }
 
     /**

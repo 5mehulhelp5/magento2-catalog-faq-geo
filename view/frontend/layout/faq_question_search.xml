@@ -14,7 +14,14 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="content">
-            <block class="Magendoo\Faq\Block\Faq\Search" name="faq.search" template="Magendoo_Faq::question/search.phtml"/>
+            <!--
+              cacheable="false": Controller\Question\Search logs every search term
+              into magendoo_faq_search_log as a side effect of the request. If this
+              page were served from the full page cache the controller would not run
+              and the Search Terms report would only count the first search per term
+              per cache variant per TTL.
+            -->
+            <block class="Magendoo\Faq\Block\Faq\Search" name="faq.search" template="Magendoo_Faq::question/search.phtml" cacheable="false"/>
         </referenceContainer>
     </body>
 </page>

@@ -15,10 +15,12 @@ namespace Magendoo\Faq\Block\Faq\Tag;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Api\Data\TagInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Question as QuestionModel;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
 use Magendoo\Faq\Model\ResourceModel\Tag as TagResource;
 use Magendoo\Faq\Model\TagFactory;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\StoreManagerInterface;
@@ -26,7 +28,7 @@ use Magento\Store\Model\StoreManagerInterface;
 /**
  * FAQ Tag View Block
  */
-class View extends Template
+class View extends Template implements IdentityInterface
 {
     /**
      * @var TagFactory
@@ -62,6 +64,11 @@ class View extends Template
      * @var TagInterface|null|false
      */
     private TagInterface|null|false $tag = false;
+
+    /**
+     * @var \Magendoo\Faq\Model\ResourceModel\Question\Collection|null
+     */
+    private ?\Magendoo\Faq\Model\ResourceModel\Question\Collection $questions = null;
 
     /**
      * @param Context $context
@@ -125,6 +132,10 @@ class View extends Template
             return null;
         }
 
+        if ($this->questions !== null) {
+            return $this->questions;
+        }
+
         $collection = $this->questionCollectionFactory->create();
 
         // Join question_tag to filter by tag
@@ -147,7 +158,38 @@ class View extends Template
 
         $collection->setOrder('position', 'ASC');
 
-        return $collection;
+        $this->questions = $collection;
+
+        return $this->questions;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * Union of the tag's and the rendered questions' identities plus the bare
+     * question list tag, so newly published or newly tagged questions show up.
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $identities = [[QuestionModel::CACHE_TAG]];
+
+        $tag = $this->getTag();
+        if ($tag instanceof IdentityInterface) {
+            $identities[] = $tag->getIdentities();
+        }
+
+        $questions = $this->getQuestions();
+        if ($questions !== null) {
+            foreach ($questions as $question) {
+                if ($question instanceof IdentityInterface) {
+                    $identities[] = $question->getIdentities();
+                }
+            }
+        }
+
+        return array_merge([], ...$identities);
     }
 
     /**

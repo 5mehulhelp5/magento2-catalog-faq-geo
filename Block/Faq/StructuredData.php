@@ -15,8 +15,10 @@ namespace Magendoo\Faq\Block\Faq;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Api\QuestionRepositoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Question as QuestionModel;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -29,7 +31,7 @@ use Psr\Log\LoggerInterface;
  * so it can live in head.additional without depending on the main content
  * block's data.
  */
-class StructuredData extends Template
+class StructuredData extends Template implements IdentityInterface
 {
     /**
      * @var FaqHelper
@@ -142,6 +144,29 @@ class StructuredData extends Template
         );
 
         return $json !== false ? $json : '';
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * The JSON-LD mirrors the questions rendered on the page, so their identities
+     * are stamped; the bare question list tag is the fallback so the head block is
+     * also refreshed when a question becomes visible on this route later.
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $identities = [];
+        foreach ($this->resolveQuestions() as $question) {
+            if ($question instanceof IdentityInterface) {
+                $identities[] = $question->getIdentities();
+            }
+        }
+
+        $identities = array_merge([], ...$identities);
+
+        return $identities ?: [QuestionModel::CACHE_TAG];
     }
 
     /**

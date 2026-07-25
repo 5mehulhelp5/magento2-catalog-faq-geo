@@ -14,16 +14,18 @@ namespace Magendoo\Faq\Block\Faq;
 
 use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\Category as CategoryModel;
 use Magendoo\Faq\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Magendoo\Faq\Ui\DataProvider\Form\CategoryDataProvider;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
 /**
  * FAQ Home Page Block
  */
-class Home extends Template
+class Home extends Template implements IdentityInterface
 {
     /**
      * @var CategoryCollectionFactory
@@ -39,6 +41,11 @@ class Home extends Template
      * @var CustomerSession
      */
     private CustomerSession $customerSession;
+
+    /**
+     * @var \Magendoo\Faq\Model\ResourceModel\Category\Collection|null
+     */
+    private ?\Magendoo\Faq\Model\ResourceModel\Category\Collection $categories = null;
 
     /**
      * @param Context $context
@@ -67,21 +74,46 @@ class Home extends Template
      */
     public function getCategories(): \Magendoo\Faq\Model\ResourceModel\Category\Collection
     {
-        $collection = $this->categoryCollectionFactory->create();
-        $collection->addFieldToFilter('status', CategoryInterface::STATUS_ENABLED);
+        if ($this->categories === null) {
+            $collection = $this->categoryCollectionFactory->create();
+            $collection->addFieldToFilter('status', CategoryInterface::STATUS_ENABLED);
 
-        $storeId = (int) $this->_storeManager->getStore()->getId();
-        $collection->addStoreFilter($storeId);
-        $collection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
+            $storeId = (int) $this->_storeManager->getStore()->getId();
+            $collection->addStoreFilter($storeId);
+            $collection->addCustomerGroupVisibilityFilter((int) $this->customerSession->getCustomerGroupId());
 
-        $sortBy = $this->helper->getSortCategoriesBy();
-        if ($sortBy === 'name') {
-            $collection->setOrder('name', 'ASC');
-        } else {
-            $collection->setOrder('position', 'ASC');
+            $sortBy = $this->helper->getSortCategoriesBy();
+            if ($sortBy === 'name') {
+                $collection->setOrder('name', 'ASC');
+            } else {
+                $collection->setOrder('position', 'ASC');
+            }
+
+            $this->categories = $collection;
         }
 
-        return $collection;
+        return $this->categories;
+    }
+
+    /**
+     * Return identifiers for produced content
+     *
+     * Union of the rendered categories' identities plus the bare list tag, so the
+     * cached page is also purged when a new category is published — the pattern of
+     * \Magento\CatalogWidget\Block\Product\ProductsList::getIdentities().
+     *
+     * @return string[]
+     */
+    public function getIdentities(): array
+    {
+        $identities = [[CategoryModel::CACHE_TAG]];
+        foreach ($this->getCategories() as $category) {
+            if ($category instanceof IdentityInterface) {
+                $identities[] = $category->getIdentities();
+            }
+        }
+
+        return array_merge([], ...$identities);
     }
 
     /**

@@ -107,6 +107,11 @@ class Search implements HttpGetActionInterface
         // deliberately stays dumb and re-runs the collection query for
         // pagination. Errors are swallowed so a logging hiccup doesn't
         // break the user-facing search page.
+        //
+        // This only counts correctly because faq_question_search.xml marks
+        // the results block cacheable="false": on a full page cache hit this
+        // controller never executes, so the layout must stay non-cacheable
+        // for the search log to see repeat searches.
         try {
             $storeId = (int) $this->storeManager->getStore()->getId();
             $this->questionManagement->searchQuestions($query, $storeId);

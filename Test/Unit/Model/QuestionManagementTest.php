@@ -16,6 +16,8 @@ use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Api\Data\QuestionSearchResultsInterfaceFactory;
 use Magendoo\Faq\Api\QuestionRepositoryInterface;
 use Magendoo\Faq\Model\Email\Sender as EmailSender;
+use Magento\Authorization\Model\UserContextInterface;
+use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\QuestionManagement;
 use Magendoo\Faq\Model\ResourceModel\Question as ResourceQuestion;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
@@ -26,6 +28,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filter\FilterManager;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Stdlib\DateTime\DateTime;
@@ -129,7 +132,10 @@ class QuestionManagementTest extends TestCase
             $this->createStub(LoggerInterface::class),
             $this->createStub(EmailSender::class),
             $this->customerSession,
-            $this->remoteAddress
+            $this->remoteAddress,
+            $this->createStub(FaqHelper::class),
+            $this->createStub(FilterManager::class),
+            $this->createStub(UserContextInterface::class)
         );
     }
 
