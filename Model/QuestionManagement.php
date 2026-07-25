@@ -22,9 +22,11 @@ use Magendoo\Faq\Model\ResourceModel\Question as ResourceQuestion;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -94,6 +96,22 @@ class QuestionManagement implements QuestionManagementInterface
      * @param LoggerInterface $logger
      * @param EmailSender $emailSender
      */
+    /**
+     * @var CustomerSession
+     */
+    private CustomerSession $customerSession;
+
+    /**
+     * @var RemoteAddress
+     */
+    private RemoteAddress $remoteAddress;
+
+    /**
+     * Vote types accepted by rateQuestion()
+     */
+    public const VOTE_POSITIVE = 'positive';
+    public const VOTE_NEGATIVE = 'negative';
+
     public function __construct(
         QuestionRepositoryInterface $questionRepository,
         ResourceQuestion $resourceQuestion,
@@ -104,7 +122,9 @@ class QuestionManagement implements QuestionManagementInterface
         ResourceModel\SearchLog $searchLogResource,
         DateTime $dateTime,
         LoggerInterface $logger,
-        EmailSender $emailSender
+        EmailSender $emailSender,
+        CustomerSession $customerSession,
+        RemoteAddress $remoteAddress
     ) {
         $this->questionRepository = $questionRepository;
         $this->resourceQuestion = $resourceQuestion;
@@ -116,6 +136,8 @@ class QuestionManagement implements QuestionManagementInterface
         $this->dateTime = $dateTime;
         $this->logger = $logger;
         $this->emailSender = $emailSender;
+        $this->customerSession = $customerSession;
+        $this->remoteAddress = $remoteAddress;
     }
 
     /**
@@ -145,13 +167,25 @@ class QuestionManagement implements QuestionManagementInterface
     /**
      * @inheritdoc
      */
-    public function rateQuestion(int $questionId, string $voteType, ?int $customerId, string $ipAddress): bool
+    public function rateQuestion(int $questionId, string $voteType): bool
     {
+        if (!in_array($voteType, [self::VOTE_POSITIVE, self::VOTE_NEGATIVE], true)) {
+            throw new LocalizedException(__('Invalid vote type.'));
+        }
+
         // Verify question exists
         $this->questionRepository->getById($questionId);
 
+        // The de-duplication key must never come from the caller: this method backs an
+        // anonymous REST route, so a client that supplied its own ip_address/customer_id
+        // could vote without limit and attribute votes to arbitrary customers.
+        $customerId = $this->customerSession->isLoggedIn()
+            ? (int) $this->customerSession->getCustomerId()
+            : null;
+        $ipAddress = (string) $this->remoteAddress->getRemoteAddress();
+
         $connection = $this->resourceConnection->getConnection();
-        $ratingTable = $this->resourceConnection->getTableName('magendoo_faq_question_rating');
+        $ratingTable = $this->resourceConnection->getTableName('magendoo_faq_rating');
 
         // Check for duplicate vote
         $select = $connection->select()
@@ -180,7 +214,7 @@ class QuestionManagement implements QuestionManagementInterface
         // Update question rating counts
         $questionTable = $this->resourceConnection->getTableName('magendoo_faq_question');
 
-        if ($voteType === 'positive') {
+        if ($voteType === self::VOTE_POSITIVE) {
             $connection->update(
                 $questionTable,
                 ['positive_rating' => new \Zend_Db_Expr('positive_rating + 1')],
