@@ -15,6 +15,7 @@ namespace Magendoo\Faq\Block\Faq;
 use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
 use Magendoo\Faq\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
+use Magendoo\Faq\Ui\DataProvider\Form\CategoryDataProvider;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -107,6 +108,35 @@ class Home extends Template
         }
 
         return $this->getUrl('faq/category/view', ['id' => $category->getCategoryId()]);
+    }
+
+    /**
+     * Build the media URL for a category icon
+     *
+     * The column stores a bare filename written by the icon upload controller into
+     * pub/media/<CategoryDataProvider::ICON_MEDIA_PATH>, so the storefront has to build the
+     * URL rather than treat the stored value as one. A value that already looks absolute is
+     * passed through, which keeps any icon set before that convention existed working.
+     *
+     * @param CategoryInterface $category
+     * @return string
+     */
+    public function getCategoryIconUrl(CategoryInterface $category): string
+    {
+        $icon = (string) $category->getIcon();
+        if ($icon === '') {
+            return '';
+        }
+
+        if (preg_match('#^(https?:)?//#i', $icon) === 1) {
+            return $icon;
+        }
+
+        /** @var \Magento\Store\Model\Store $store */
+        $store = $this->_storeManager->getStore();
+        $mediaUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+
+        return $mediaUrl . CategoryDataProvider::ICON_MEDIA_PATH . '/' . ltrim($icon, '/');
     }
 
     /**

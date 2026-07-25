@@ -34,8 +34,9 @@
                 <?php foreach ($categories as $category): ?>
                 <div class="faq-category-item">
                     <a href="<?= $block->escapeUrl($block->getCategoryUrl($category)) ?>" class="faq-category-link">
-                        <?php if ($category->getIcon()): ?>
-                        <img src="<?= $block->escapeUrl($category->getIcon()) ?>"
+                        <?php $iconUrl = $block->getCategoryIconUrl($category); ?>
+                        <?php if ($iconUrl): ?>
+                        <img src="<?= $block->escapeUrl($iconUrl) ?>"
                              alt="<?= $block->escapeHtmlAttr($category->getName()) ?>" class="faq-category-icon"/>
                         <?php endif; ?>
                         <h2 class="faq-category-name"><?= $block->escapeHtml($category->getName()) ?></h2>

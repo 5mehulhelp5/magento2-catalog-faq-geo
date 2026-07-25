@@ -76,6 +76,7 @@ class QuestionActions extends Column
                             'title' => __('Delete Question'),
                             'message' => __('Are you sure you want to delete this question?'),
                         ],
+                        'post' => true,
                     ];
                 }
             }

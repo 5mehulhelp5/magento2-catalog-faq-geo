@@ -29,7 +29,7 @@
             </storageConfig>
             <updateUrl path="mui/index/render"/>
         </settings>
-        <aclResource>Magendoo_Faq::searchlog</aclResource>
+        <aclResource>Magendoo_Faq::search_log</aclResource>
         <dataProvider class="Magendoo\Faq\Ui\DataProvider\SearchLogDataProvider" name="faq_searchlog_listing_data_source">
             <settings>
                 <requestFieldName>id</requestFieldName>
