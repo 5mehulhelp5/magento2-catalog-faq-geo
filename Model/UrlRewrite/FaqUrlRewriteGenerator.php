@@ -15,8 +15,11 @@ namespace Magendoo\Faq\Model\UrlRewrite;
 use Magendoo\Faq\Api\Data\CategoryInterface;
 use Magendoo\Faq\Api\Data\QuestionInterface;
 use Magendoo\Faq\Helper\Data as FaqHelper;
+use Magendoo\Faq\Model\ResourceModel\Category as CategoryResource;
 use Magendoo\Faq\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
+use Magendoo\Faq\Model\ResourceModel\Question as QuestionResource;
 use Magendoo\Faq\Model\ResourceModel\Question\CollectionFactory as QuestionCollectionFactory;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewrite;
@@ -64,12 +67,24 @@ class FaqUrlRewriteGenerator
     private QuestionCollectionFactory $questionCollectionFactory;
 
     /**
+     * @var CategoryResource
+     */
+    private CategoryResource $categoryResource;
+
+    /**
+     * @var QuestionResource
+     */
+    private QuestionResource $questionResource;
+
+    /**
      * @param UrlPersistInterface $urlPersist
      * @param UrlRewriteFactory $urlRewriteFactory
      * @param StoreManagerInterface $storeManager
      * @param FaqHelper $helper
      * @param CategoryCollectionFactory $categoryCollectionFactory
      * @param QuestionCollectionFactory $questionCollectionFactory
+     * @param CategoryResource $categoryResource
+     * @param QuestionResource $questionResource
      */
     public function __construct(
         UrlPersistInterface $urlPersist,
@@ -77,7 +92,9 @@ class FaqUrlRewriteGenerator
         StoreManagerInterface $storeManager,
         FaqHelper $helper,
         CategoryCollectionFactory $categoryCollectionFactory,
-        QuestionCollectionFactory $questionCollectionFactory
+        QuestionCollectionFactory $questionCollectionFactory,
+        CategoryResource $categoryResource,
+        QuestionResource $questionResource
     ) {
         $this->urlPersist = $urlPersist;
         $this->urlRewriteFactory = $urlRewriteFactory;
@@ -85,6 +102,8 @@ class FaqUrlRewriteGenerator
         $this->helper = $helper;
         $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->questionCollectionFactory = $questionCollectionFactory;
+        $this->categoryResource = $categoryResource;
+        $this->questionResource = $questionResource;
     }
 
     /**
@@ -176,17 +195,28 @@ class FaqUrlRewriteGenerator
      */
     public function generateAll(): void
     {
-        // Regenerate for all categories
+        // The collections do not hydrate the store junction, so store_ids has to be looked up
+        // per entity. Without it every entity would fall through to "all stores" and a single
+        // run of this command would un-scope every rewrite in the store.
         $categoryCollection = $this->categoryCollectionFactory->create();
         foreach ($categoryCollection as $category) {
-            /** @var CategoryInterface $category */
+            /** @var \Magento\Framework\DataObject&CategoryInterface $category */
+            if ((int) $category->getStatus() !== CategoryInterface::STATUS_ENABLED) {
+                continue;
+            }
+            $categoryId = (int) $category->getCategoryId();
+            $category->setData('store_ids', $this->categoryResource->lookupStoreIds($categoryId));
             $this->generateForCategory($category);
         }
 
-        // Regenerate for all questions
         $questionCollection = $this->questionCollectionFactory->create();
         foreach ($questionCollection as $question) {
-            /** @var QuestionInterface $question */
+            /** @var \Magento\Framework\DataObject&QuestionInterface $question */
+            if ($question->getStatus() !== QuestionInterface::STATUS_ANSWERED) {
+                continue;
+            }
+            $questionId = (int) $question->getQuestionId();
+            $question->setData('store_ids', $this->questionResource->lookupStoreIds($questionId));
             $this->generateForQuestion($question);
         }
     }
@@ -220,12 +250,18 @@ class FaqUrlRewriteGenerator
         $storeIds = $entity->getData('store_ids');
 
         if (is_array($storeIds) && !empty($storeIds)) {
-            // If store_id 0 (all stores) is included, expand to all real store IDs
-            if (in_array(0, $storeIds, true)) {
+            // Normalise first: an admin form POST delivers store ids as strings ("0", "1"),
+            // so the "All Store Views" check must not be a strict comparison against int 0.
+            // Store id 0 is not a real store — a rewrite written with store_id = 0 is never
+            // matched by Magento's UrlRewrite router, which looks rewrites up by the current
+            // store id. Expand it to every real store instead.
+            $storeIds = array_map('intval', $storeIds);
+
+            if (in_array(Store::DEFAULT_STORE_ID, $storeIds, true)) {
                 return $this->getAllStoreIds();
             }
 
-            return array_map('intval', $storeIds);
+            return $storeIds;
         }
 
         return $this->getAllStoreIds();
