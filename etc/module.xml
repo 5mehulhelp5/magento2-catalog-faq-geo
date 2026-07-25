@@ -20,6 +20,12 @@
             <module name="Magento_Backend"/>
             <module name="Magento_Ui"/>
             <module name="Magento_UrlRewrite"/>
+            <module name="Magento_Sitemap"/>
+            <module name="Magento_Widget"/>
+            <module name="Magento_ReCaptchaUi"/>
+            <module name="Magento_ReCaptchaFrontendUi"/>
+            <module name="Magento_ReCaptchaAdminUi"/>
+            <module name="Magento_ReCaptchaValidation"/>
         </sequence>
     </module>
 </config>

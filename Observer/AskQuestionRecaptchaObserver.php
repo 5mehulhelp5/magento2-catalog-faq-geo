@@ -12,7 +12,8 @@ declare(strict_types=1);
 
 namespace Magendoo\Faq\Observer;
 
-use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\Response\Http as HttpResponse;
 use Magento\Framework\App\Response\RedirectInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -40,11 +41,15 @@ class AskQuestionRecaptchaObserver implements ObserverInterface
      * @param RedirectInterface $redirect
      * @param IsCaptchaEnabledInterface $isCaptchaEnabled
      * @param RequestHandlerInterface $requestHandler
+     * @param RequestInterface $request
+     * @param HttpResponse $response
      */
     public function __construct(
         private readonly RedirectInterface $redirect,
         private readonly IsCaptchaEnabledInterface $isCaptchaEnabled,
-        private readonly RequestHandlerInterface $requestHandler
+        private readonly RequestHandlerInterface $requestHandler,
+        private readonly RequestInterface $request,
+        private readonly HttpResponse $response
     ) {
     }
 
@@ -58,16 +63,15 @@ class AskQuestionRecaptchaObserver implements ObserverInterface
             return;
         }
 
-        /** @var Action $controller */
-        $controller = $observer->getControllerAction();
-        $request = $controller->getRequest();
-        $response = $controller->getResponse();
+        // The dispatched controller implements only ActionInterface::execute(); it has no
+        // getRequest()/getResponse(). Take both from dependency injection instead — calling
+        // them on the action instance was a fatal error whenever a captcha was configured.
         $redirectOnFailureUrl = (string) $this->redirect->getRedirectUrl();
 
         $this->requestHandler->execute(
             self::RECAPTCHA_KEY,
-            $request,
-            $response,
+            $this->request,
+            $this->response,
             $redirectOnFailureUrl
         );
     }
