@@ -29,6 +29,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
     suite doubles.
   - `phpcs` was pointed at the checkout root, which in a standalone checkout also contains
     the installed `vendor/`.
+  - PHPUnit 11 is excluded from the dev requirement (`^10.5 || ^12.0`). It made
+    `TestCase::getMockBuilder()` protected, which breaks Magento's own
+    `Magento\Framework\TestFramework\Unit\Helper\ObjectManager` — every test that builds a
+    subject through the helper errors out. PHPUnit 10.5 and 12 both work; 11 never did.
 - **`@var` annotations no longer contradict the type they narrow.** `Block/Faq/Hreflang.php`
   and `Model/UrlRewrite/FaqUrlRewriteGenerator.php` widened `$entity` to `AbstractModel` /
   `DataObject` to reach `getData()`; both now intersect with the declared interfaces instead.
